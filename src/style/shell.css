@@ -1,0 +1,470 @@
+/* ═══════════════════════════════════════════════════════════
+   shell.css — Layout base: sidebar + área de conteúdo
+════════════════════════════════════════════════════════════ */
+
+/* ── App shell: sidebar + conteúdo lado a lado ── */
+.app-shell {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-app);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SIDEBAR
+════════════════════════════════════════════════════════════ */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width-collapsed);
+  min-width: var(--sidebar-width-collapsed);
+  height: 100%;
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+
+  /* Expansão suave ao abrir o menu hambúrguer */
+  transition:
+    width            var(--duration-slow) var(--ease-out),
+    min-width        var(--duration-slow) var(--ease-out),
+    background-color var(--duration-theme) var(--ease-default);
+}
+
+.sidebar.expanded {
+  width: var(--sidebar-width-expanded);
+  min-width: var(--sidebar-width-expanded);
+}
+
+/* ── Botão hambúrguer ── */
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 48px;
+  min-height: 48px;
+  color: var(--text-secondary);
+  border-radius: 0;
+  transition: color var(--duration-base) var(--ease-default),
+              background-color var(--duration-base) var(--ease-default);
+}
+
+.sidebar-toggle:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-surface-2);
+}
+
+.sidebar-toggle:active {
+  background-color: var(--btn-hover-bg);
+}
+
+/* ── Navegação central ── */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding-top: var(--space-2);
+  gap: 2px;
+}
+
+/* ── Item de navegação ── */
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  height: 44px;
+  padding: 0 var(--space-4);
+  color: var(--text-secondary);
+  border-radius: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+    color            var(--duration-base) var(--ease-default),
+    background-color var(--duration-base) var(--ease-default);
+}
+
+.nav-item:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-surface-2);
+}
+
+.nav-item:active {
+  background-color: var(--btn-hover-bg);
+}
+
+/* Estado ativo */
+.nav-item.active {
+  color: var(--text-primary);
+  background-color: var(--bg-surface-2);
+}
+
+/* Barra de acento lateral — visível apenas no item ativo */
+.nav-accent {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 3px;
+  height: 18px;
+  background-color: var(--nav-accent-bar);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.nav-item.active .nav-accent {
+  transform: translateY(-50%) scaleY(1);
+}
+
+/* Ícone SVG do item */
+.nav-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  transition: color var(--duration-base) var(--ease-default);
+}
+
+/* Label de texto — visível apenas quando a sidebar está expandida */
+.nav-label {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-regular);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity   var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+  pointer-events: none;
+}
+
+.sidebar.expanded .nav-label {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Rodapé da sidebar (configurações) ── */
+.sidebar-footer {
+  padding-bottom: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+
+.settings-btn {
+  margin-top: var(--space-2);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ÁREA DE CONTEÚDO PRINCIPAL
+════════════════════════════════════════════════════════════ */
+.content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  background-color: var(--bg-app);
+  transition: background-color var(--duration-theme) var(--ease-default);
+}
+
+/* ── Páginas / seções ── */
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+
+  /* Animação de entrada ao trocar de aba */
+  animation: pageEnter var(--duration-base) var(--ease-out);
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BARRA DE AÇÕES INFERIOR (compartilhada entre módulos)
+════════════════════════════════════════════════════════════ */
+.action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  margin-top: auto;
+}
+
+/* Botão de ação circular */
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  transition:
+    color            var(--duration-fast) var(--ease-default),
+    background-color var(--duration-fast) var(--ease-default),
+    border-color     var(--duration-fast) var(--ease-default),
+    transform        var(--duration-fast) var(--ease-default);
+}
+
+.action-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-surface-2);
+  border-color: var(--border-strong);
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+  background-color: var(--btn-hover-bg);
+}
+
+/* Botão de confirmação (✓) — versão do modo edição */
+.action-btn--confirm {
+  background-color: var(--bg-surface-2);
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOTÕES DE ÍCONE (↗ expandir, ⧉ pin — usados em cards)
+════════════════════════════════════════════════════════════ */
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  transition:
+    color            var(--duration-fast) var(--ease-default),
+    background-color var(--duration-fast) var(--ease-default);
+}
+
+.icon-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-surface-2);
+}
+
+.icon-btn:active {
+  background-color: var(--btn-hover-bg);
+}
+
+/* Estado ativo do botão pin (always-on-top ligado) */
+.icon-btn.active {
+  color: var(--accent);
+  background-color: var(--accent-dim);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOOLTIPS
+════════════════════════════════════════════════════════════ */
+[title] {
+  position: relative;
+}
+
+/* Tooltip nativo do browser é suficiente para a v1.
+   Caso queira tooltip customizado no futuro,
+   use o atributo data-tooltip e adicione o CSS abaixo. */
+
+/* ═══════════════════════════════════════════════════════════
+   MODAIS — overlay e container base
+════════════════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-overlay);
+
+  /* Animação de entrada */
+  animation: overlayIn var(--duration-modal) var(--ease-out);
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  width: 380px;
+  max-width: calc(100vw - var(--space-8));
+  box-shadow: var(--shadow-modal);
+
+  /* Animação de entrada */
+  animation: modalIn var(--duration-modal) var(--ease-out);
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-medium);
+  color: var(--text-primary);
+  margin-bottom: var(--space-5);
+}
+
+/* Botões do modal (Salvar / Cancelar / Adicionar) */
+.modal-actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.modal-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  justify-content: center;
+  height: 36px;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+  border: 1px solid transparent;
+  transition:
+    background-color var(--duration-fast) var(--ease-default),
+    transform        var(--duration-fast) var(--ease-default);
+}
+
+.modal-btn:active {
+  transform: scale(0.97);
+}
+
+/* Botão primário — fundo dourado */
+.modal-btn--primary {
+  background-color: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.modal-btn--primary:hover {
+  background-color: var(--accent);
+  color: var(--btn-primary-fg);
+}
+
+/* Botão secundário — fundo escuro */
+.modal-btn--secondary {
+  background-color: var(--bg-surface-2);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+.modal-btn--secondary:hover {
+  background-color: var(--btn-hover-bg);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL — input de busca (usado no modal de cidade)
+════════════════════════════════════════════════════════════ */
+.modal-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.modal-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 var(--space-8) 0 var(--space-3);
+  background-color: var(--bg-surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--fs-base);
+  transition:
+    border-color     var(--duration-fast) var(--ease-default),
+    background-color var(--duration-fast) var(--ease-default);
+}
+
+.modal-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.modal-input:focus {
+  border-color: var(--border-accent);
+  background-color: var(--bg-surface);
+  outline: none;
+}
+
+.modal-input-icon {
+  position: absolute;
+  right: var(--space-3);
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CONFIGURAÇÕES — accordion
+════════════════════════════════════════════════════════════ */
+.settings-accordion {
+  padding: var(--space-2) var(--space-4) var(--space-4);
+  border-top: 1px solid var(--border);
+  animation: accordionOpen var(--duration-slow) var(--ease-out);
+}
+
+@keyframes accordionOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UTILITÁRIOS GERAIS
+════════════════════════════════════════════════════════════ */
+
+/* Separador horizontal */
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+/* Texto truncado em uma linha */
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Centralizar conteúdo verticalmente em tela cheia */
+.center-fill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+}

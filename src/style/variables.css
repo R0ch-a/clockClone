@@ -1,0 +1,273 @@
+/* ═══════════════════════════════════════════════════════════
+   variables.css — Design tokens do clockClone
+   Tema escuro (padrão) e tema claro via [data-theme="light"]
+════════════════════════════════════════════════════════════ */
+
+/* ── Tema escuro (padrão) ── */
+:root,
+[data-theme="dark"] {
+
+  /* Cores de fundo */
+  --bg-app:          #1c1c1a;   /* fundo principal da janela */
+  --bg-surface:      #2c2c2a;   /* cards, modais, sidebar */
+  --bg-surface-2:    #343432;   /* hover em cards, inputs */
+  --bg-sidebar:      #242422;   /* barra lateral */
+  --bg-overlay:      rgba(0, 0, 0, 0.60); /* overlay dos modais */
+  --bg-banner:       #2e2800;   /* banner de aviso (alarme) */
+
+  /* Cores de texto */
+  --text-primary:    #ffffff;
+  --text-secondary:  #a0a09a;
+  --text-tertiary:   #6a6a65;
+  --text-disabled:   #4a4a47;
+
+  /* Cor de acento — dourado característico do Windows 11 Clock */
+  --accent:          #c9b97a;
+  --accent-dim:      rgba(201, 185, 122, 0.15);
+  --accent-hover:    #d4c78a;
+
+  /* Bordas */
+  --border:          #3a3a38;
+  --border-strong:   #4a4a47;
+  --border-accent:   #c9b97a;
+
+  /* Cores semânticas */
+  --danger:          #e24b4a;   /* lixeira vermelha, erros */
+  --danger-dim:      rgba(226, 75, 74, 0.12);
+  --warning:         #c9b97a;   /* banner de aviso */
+  --success:         #5cb85c;
+
+  /* Anel do temporizador */
+  --ring-track:      #3a3a38;   /* trilha de fundo do anel */
+  --ring-fill:       #c9b97a;   /* anel de progresso */
+
+  /* Botões de controle (play/pause/reset) */
+  --btn-primary-bg:  #c9b97a;
+  --btn-primary-fg:  #1c1c1a;
+  --btn-secondary-bg:#3a3a38;
+  --btn-secondary-fg:#d0d0cc;
+  --btn-hover-bg:    #444440;
+
+  /* Toggle do alarme */
+  --toggle-off:      #4a4a47;
+  --toggle-on:       #c9b97a;
+  --toggle-thumb:    #ffffff;
+
+  /* Pílulas de dias da semana */
+  --pill-off-bg:     #3a3a38;
+  --pill-off-fg:     #a0a09a;
+  --pill-on-bg:      #c9b97a;
+  --pill-on-fg:      #1c1c1a;
+
+  /* Sidebar */
+  --sidebar-width-collapsed: 56px;
+  --sidebar-width-expanded:  220px;
+  --nav-accent-bar:  #c9b97a;   /* barra vertical do item ativo */
+
+  /* Sombras */
+  --shadow-modal:    0 8px 32px rgba(0, 0, 0, 0.50);
+  --shadow-card:     0 2px 8px  rgba(0, 0, 0, 0.30);
+
+  /* Scrollbar */
+  --scrollbar-track: #242422;
+  --scrollbar-thumb: #4a4a47;
+}
+
+/* ── Tema claro ── */
+[data-theme="light"] {
+
+  --bg-app:          #f3f3f0;
+  --bg-surface:      #ffffff;
+  --bg-surface-2:    #ebebea;
+  --bg-sidebar:      #e8e8e5;
+  --bg-overlay:      rgba(0, 0, 0, 0.35);
+  --bg-banner:       #fdf3d0;
+
+  --text-primary:    #1c1c1a;
+  --text-secondary:  #5a5a55;
+  --text-tertiary:   #8a8a85;
+  --text-disabled:   #b0b0aa;
+
+  --accent:          #8a7840;
+  --accent-dim:      rgba(138, 120, 64, 0.12);
+  --accent-hover:    #7a6830;
+
+  --border:          #d0d0cc;
+  --border-strong:   #b0b0aa;
+  --border-accent:   #8a7840;
+
+  --danger:          #c0392b;
+  --danger-dim:      rgba(192, 57, 43, 0.10);
+  --warning:         #8a7840;
+  --success:         #27ae60;
+
+  --ring-track:      #d0d0cc;
+  --ring-fill:       #8a7840;
+
+  --btn-primary-bg:  #8a7840;
+  --btn-primary-fg:  #ffffff;
+  --btn-secondary-bg:#e0e0dc;
+  --btn-secondary-fg:#1c1c1a;
+  --btn-hover-bg:    #d0d0cc;
+
+  --toggle-off:      #c0c0bc;
+  --toggle-on:       #8a7840;
+  --toggle-thumb:    #ffffff;
+
+  --pill-off-bg:     #e0e0dc;
+  --pill-off-fg:     #5a5a55;
+  --pill-on-bg:      #8a7840;
+  --pill-on-fg:      #ffffff;
+
+  --nav-accent-bar:  #8a7840;
+
+  --shadow-modal:    0 8px 32px rgba(0, 0, 0, 0.18);
+  --shadow-card:     0 2px 8px  rgba(0, 0, 0, 0.08);
+
+  --scrollbar-track: #e8e8e5;
+  --scrollbar-thumb: #c0c0bc;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Tokens de tipografia
+════════════════════════════════════════════════════════════ */
+:root {
+  /* Fonte principal — Segoe UI Variable é a fonte do Windows 11.
+     Fallback para sistemas sem ela (ex: durante dev no Linux/Mac) */
+  --font-ui:    "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-mono:  "Cascadia Code", "Consolas", monospace;
+
+  /* Tamanhos de fonte */
+  --fs-xs:    11px;
+  --fs-sm:    12px;
+  --fs-base:  14px;
+  --fs-md:    16px;
+  --fs-lg:    20px;
+  --fs-xl:    28px;
+  --fs-2xl:   40px;
+  --fs-3xl:   64px;   /* display do cronômetro/timer expandido */
+
+  /* Pesos */
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-bold:    600;
+
+  /* Line-height */
+  --lh-tight:   1.2;
+  --lh-base:    1.5;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Tokens de espaçamento
+════════════════════════════════════════════════════════════ */
+:root {
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Tokens de borda e raio
+════════════════════════════════════════════════════════════ */
+:root {
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-full: 9999px;  /* pílulas e botões circulares */
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Tokens de animação / transição
+════════════════════════════════════════════════════════════ */
+:root {
+  --duration-fast:   100ms;
+  --duration-base:   150ms;
+  --duration-slow:   200ms;
+  --duration-modal:  120ms;
+  --duration-theme:  200ms;
+  --ease-default:    ease;
+  --ease-out:        ease-out;
+  --ease-in:         ease-in;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Reset e base global
+════════════════════════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;  /* a janela Tauri não deve ter scroll no body */
+}
+
+body {
+  font-family: var(--font-ui);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-base);
+  color: var(--text-primary);
+  background-color: var(--bg-app);
+
+  /* Transição suave ao trocar de tema */
+  transition:
+    background-color var(--duration-theme) var(--ease-default),
+    color            var(--duration-theme) var(--ease-default);
+
+  /* Evita seleção de texto acidental em app desktop */
+  user-select: none;
+
+  /* Renderização de texto mais nítida no Windows */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Scrollbars customizadas (Chromium/WebView2) */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* Botões e inputs herdam a fonte */
+button, input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+input {
+  background: none;
+  border: none;
+  outline: none;
+}
+
+/* Classe utilitária — oculta elemento sem remover do DOM */
+.hidden {
+  display: none !important;
+}
