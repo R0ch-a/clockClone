@@ -191,7 +191,6 @@ function criarCardAlarme(alarm) {
         }
       </div>
     </div>
-    ${!editMode ? '<div class="alarm-card-hover-label">Editar alarme</div>' : ''}
   `;
 
   // Toggle on/off
@@ -199,6 +198,12 @@ function criarCardAlarme(alarm) {
   toggleInput?.addEventListener('change', (e) => {
     e.stopPropagation();
     alternarAlarme(alarm.id, toggleInput.checked);
+  });
+
+  // Impede que o clique no toggle abra o modal de edição
+  const toggleLabel = card.querySelector('.alarm-toggle');
+  toggleLabel?.addEventListener('click', (e) => {
+    e.stopPropagation();
   });
 
   // Pílulas de dias

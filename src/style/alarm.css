@@ -40,22 +40,6 @@
   border-color: var(--border-strong);
 }
 
-/* Tooltip "Editar alarme" no hover */
-.alarm-card-hover-label {
-  position: absolute;
-  top: var(--space-3);
-  right: var(--space-5);
-  font-size: var(--fs-xs);
-  color: var(--text-tertiary);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--duration-fast) var(--ease-default);
-}
-
-.alarm-card:hover .alarm-card-hover-label {
-  opacity: 1;
-}
-
 /* Layout interno do card */
 .alarm-card-main {
   display: flex;
