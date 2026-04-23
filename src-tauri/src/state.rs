@@ -5,6 +5,7 @@
 // global compartilhado entre threads via Mutex.
 // ═══════════════════════════════════════════════════════════
 
+#![allow(dead_code)]
 use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
 
