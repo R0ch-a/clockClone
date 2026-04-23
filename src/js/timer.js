@@ -174,9 +174,8 @@ function pararTimer(id, terminou = false) {
     const endTime = card.querySelector('.timer-end-time');
 
     if (display) display.textContent = formatarTempoTimer(timer?.durationSecs ?? 0);
-    if (ring)    {
-      ring.style.strokeDashoffset = CIRCUMFERENCE; // anel vazio
-      // Reseta para o estado cinza
+    if (ring && terminou) {
+      ring.style.strokeDashoffset = CIRCUMFERENCE;
       ring.style.stroke = 'var(--ring-track)';
     }
     if (endTime) endTime.textContent = '';
@@ -208,7 +207,7 @@ function redefinirTimer(id) {
     if (display) display.textContent = formatarTempoTimer(timer.durationSecs);
     if (ring) {
       ring.style.strokeDashoffset = 0; // anel cheio (cinza)
-      ring.style.stroke = 'var(--ring-track)';
+      ring.style.stroke = 'var(--ring-fill)';
     }
     if (endTime) endTime.textContent = '';
   }
@@ -313,7 +312,7 @@ function criarCardTimer(timer) {
         <circle class="timer-ring-fill"
           cx="100" cy="100" r="90"
           fill="none"
-          stroke="var(--ring-track)"
+          stroke="var(--ring-fill)"
           stroke-width="8"
           stroke-dasharray="${CIRCUMFERENCE}"
           stroke-dashoffset="0"
