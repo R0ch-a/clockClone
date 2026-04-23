@@ -1,0 +1,274 @@
+/* ═══════════════════════════════════════════════════════════
+   alarm.css — Estilos do módulo Alarme
+════════════════════════════════════════════════════════════ */
+
+/* ── Layout da página de alarme ── */
+#page-alarm {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Lista de alarmes ── */
+.alarm-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARD DE ALARME
+════════════════════════════════════════════════════════════ */
+.alarm-card {
+  position: relative;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  padding: var(--space-4) var(--space-5);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-default),
+    border-color     var(--duration-fast) var(--ease-default);
+}
+
+.alarm-card:hover {
+  background-color: var(--bg-surface-2);
+  border-color: var(--border-strong);
+}
+
+/* Tooltip "Editar alarme" no hover */
+.alarm-card-hover-label {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-5);
+  font-size: var(--fs-xs);
+  color: var(--text-tertiary);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.alarm-card:hover .alarm-card-hover-label {
+  opacity: 1;
+}
+
+/* Layout interno do card */
+.alarm-card-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.alarm-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.alarm-card-right {
+  flex-shrink: 0;
+  padding-top: var(--space-1);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HORÁRIO DO ALARME
+════════════════════════════════════════════════════════════ */
+.alarm-time {
+  font-size: 48px;
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+
+  /* Cinza quando inativo */
+  color: var(--text-tertiary);
+  transition: color var(--duration-base) var(--ease-default);
+}
+
+/* Branco quando ativo */
+.alarm-card--active .alarm-time {
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COUNTDOWN "em X horas, Y minutos"
+════════════════════════════════════════════════════════════ */
+.alarm-countdown {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.alarm-countdown svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.alarm-countdown-placeholder {
+  height: 18px; /* reserva espaço mesmo sem countdown */
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NOME DO ALARME
+════════════════════════════════════════════════════════════ */
+.alarm-label {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-regular);
+
+  /* Cinza quando inativo */
+  color: var(--text-tertiary);
+  transition: color var(--duration-base) var(--ease-default);
+}
+
+.alarm-card--active .alarm-label {
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PÍLULAS DE DIAS DA SEMANA
+════════════════════════════════════════════════════════════ */
+.alarm-days {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.alarm-day-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+
+  /* Estado inativo */
+  background-color: var(--pill-off-bg);
+  color: var(--pill-off-fg);
+
+  transition:
+    background-color var(--duration-fast) var(--ease-default),
+    color            var(--duration-fast) var(--ease-default),
+    transform        var(--duration-fast) var(--ease-default);
+}
+
+.alarm-day-pill:hover {
+  transform: scale(1.1);
+}
+
+.alarm-day-pill:active {
+  transform: scale(0.95);
+}
+
+/* Estado ativo — dourado */
+.alarm-day-pill--active {
+  background-color: var(--pill-on-bg);
+  color: var(--pill-on-fg);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOGGLE ON/OFF
+════════════════════════════════════════════════════════════ */
+.alarm-toggle {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* Esconde o checkbox nativo */
+.alarm-toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Trilha do toggle */
+.alarm-toggle-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 44px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background-color: var(--toggle-off);
+  transition: background-color var(--duration-base) var(--ease-default);
+}
+
+.alarm-toggle-input:checked + .alarm-toggle-track {
+  background-color: var(--toggle-on);
+}
+
+/* Bolinha do toggle */
+.alarm-toggle-thumb {
+  position: absolute;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background-color: var(--toggle-thumb);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform var(--duration-base) var(--ease-default);
+}
+
+.alarm-toggle-input:checked + .alarm-toggle-track .alarm-toggle-thumb {
+  transform: translateX(20px);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BARRA DE AÇÕES
+════════════════════════════════════════════════════════════ */
+#alarmActions {
+  padding: var(--space-2) var(--space-4);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BANNER FIXO — "Os alarmes soarão apenas quando..."
+════════════════════════════════════════════════════════════ */
+.alarm-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background-color: var(--bg-banner);
+  border-top: 1px solid rgba(201, 185, 122, 0.25);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.alarm-banner svg {
+  flex-shrink: 0;
+}
+
+.alarm-banner span {
+  flex: 1;
+}
+
+/* Link "Alterar configurações de energia" */
+.banner-link {
+  font-size: var(--fs-sm);
+  color: var(--accent);
+  white-space: nowrap;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--duration-fast) var(--ease-default);
+}
+
+.banner-link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
