@@ -1,7 +1,7 @@
 mod state;
 mod commands;
 mod alarm_scheduler;
-
+mod audio;
 use std::sync::Arc;
 
 fn main() {

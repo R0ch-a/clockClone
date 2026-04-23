@@ -16,6 +16,9 @@
 /// ```js
 /// await invoke('send_notification', { title: 'Alarme', body: 'Bom dia!' })
 /// ```
+
+use crate::audio;
+
 #[tauri::command]
 pub async fn send_notification(
     app: tauri::AppHandle,
@@ -30,6 +33,9 @@ pub async fn send_notification(
         .body(&body)
         .show()
         .map_err(|e| format!("Erro ao enviar notificação: {e}"))?;
+
+    // Toca o som de alarme junto com a notificação
+    audio::tocar_alarme();
 
     Ok(())
 }
