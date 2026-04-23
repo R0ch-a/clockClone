@@ -1,0 +1,191 @@
+/* ═══════════════════════════════════════════════════════════
+   world-clock.css — Estilos do módulo Relógio Mundial
+════════════════════════════════════════════════════════════ */
+
+/* ── Layout da página ── */
+#page-world-clock {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MAPA
+════════════════════════════════════════════════════════════ */
+.world-map-container {
+  width: 100%;
+  height: 45%;
+  min-height: 200px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #1a1a18 0%, #2a2a28 100%);
+  position: relative;
+}
+
+.world-map-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Países do mapa */
+.mapa-pais {
+  fill: #3a3a38;
+  stroke: #2a2a28;
+  stroke-width: 0.5;
+  transition: fill var(--duration-fast) var(--ease-default);
+}
+
+.mapa-pais:hover {
+  fill: #4a4a47;
+}
+
+/* ─── Pins de localização ─── */
+.mapa-pin {
+  cursor: default;
+}
+
+.pin-circle {
+  fill: #888780;
+  transition: fill var(--duration-base) var(--ease-default);
+}
+
+.pin-dot {
+  fill: #1c1c1a;
+}
+
+/* Pin da hora local — sempre dourado */
+.mapa-pin--local .pin-circle {
+  fill: var(--accent);
+}
+
+.mapa-pin--local .pin-dot {
+  fill: var(--bg-app);
+}
+
+/* Animação de entrada dos pins */
+.mapa-pins {
+  animation: fadeIn var(--duration-slow) var(--ease-out);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LISTA DE CIDADES
+════════════════════════════════════════════════════════════ */
+.clock-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ─── Card de cidade ─── */
+.clock-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition:
+    background-color var(--duration-fast) var(--ease-default),
+    border-color     var(--duration-fast) var(--ease-default);
+  animation: pageEnter var(--duration-base) var(--ease-out);
+}
+
+.clock-card:hover {
+  background-color: var(--bg-surface-2);
+  border-color: var(--border-strong);
+}
+
+.clock-card-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+}
+
+/* ─── Ícone dia/noite ─── */
+.clock-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.clock-icon--day {
+  color: #c9b97a;
+}
+
+.clock-icon--night {
+  color: var(--text-tertiary);
+}
+
+/* ─── Hora ─── */
+.clock-time {
+  font-size: 28px;
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  min-width: 70px;
+}
+
+/* ─── Info (nome + data/fuso) ─── */
+.clock-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.clock-name {
+  font-size: var(--fs-base);
+  color: var(--text-primary);
+  font-weight: var(--fw-regular);
+}
+
+.clock-date {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+
+/* ─── Botão de deletar (modo edição) ─── */
+.clock-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  color: var(--danger);
+  flex-shrink: 0;
+  transition:
+    background-color var(--duration-fast) var(--ease-default),
+    transform        var(--duration-fast) var(--ease-default);
+}
+
+.clock-delete-btn:hover {
+  background-color: var(--danger-dim);
+}
+
+.clock-delete-btn:active {
+  transform: scale(0.9);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BARRA DE AÇÕES
+════════════════════════════════════════════════════════════ */
+#worldClockActions {
+  padding: var(--space-2) var(--space-4);
+}
+
+/* Botão "Concluído" do modo edição */
+#worldClockDone {
+  display: flex;
+}
