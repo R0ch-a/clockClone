@@ -1,0 +1,211 @@
+/* ═══════════════════════════════════════════════════════════
+   stopwatch.css — Estilos do módulo Cronômetro
+════════════════════════════════════════════════════════════ */
+
+/* ── Layout da página do cronômetro ── */
+#page-stopwatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-4) var(--space-6) var(--space-6);
+  overflow-y: auto;
+}
+
+/* ── Botões de ação no canto superior direito ── */
+.stopwatch-view-controls {
+  display: flex;
+  gap: var(--space-2);
+  align-self: flex-end;
+  margin-bottom: var(--space-4);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DISPLAY PRINCIPAL — hh:mm:ss,ms
+════════════════════════════════════════════════════════════ */
+.stopwatch-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-8);
+}
+
+.stopwatch-time {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  font-size: 80px;
+  font-weight: var(--fw-regular);
+  color: var(--text-primary);
+  letter-spacing: -2px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transition: color var(--duration-theme) var(--ease-default);
+}
+
+.time-segment {
+  min-width: 2ch;
+  text-align: center;
+}
+
+.time-colon {
+  margin: 0 2px;
+  opacity: 0.6;
+}
+
+.time-ms {
+  font-size: 44px;
+  font-weight: var(--fw-regular);
+  color: var(--text-secondary);
+  letter-spacing: 0;
+  margin-left: 2px;
+}
+
+/* Rótulos h / min / seg */
+.stopwatch-labels {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  justify-content: center;
+}
+
+.stopwatch-labels span {
+  font-size: var(--fs-sm);
+  color: var(--text-tertiary);
+  text-align: center;
+  /* Alinhados com os segmentos de tempo acima */
+  min-width: 90px;
+}
+
+.stopwatch-labels span:last-child {
+  min-width: 130px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOTÕES DE CONTROLE — play/pause, volta, reset
+════════════════════════════════════════════════════════════ */
+.stopwatch-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+/* Botão base circular */
+.ctrl-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  transition:
+    background-color var(--duration-fast) var(--ease-default),
+    transform        var(--duration-fast) var(--ease-default),
+    color            var(--duration-fast) var(--ease-default);
+}
+
+.ctrl-btn:active {
+  transform: scale(0.93);
+}
+
+/* Botão primário — play/pause (dourado) */
+.ctrl-btn--primary {
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  width: 64px;
+  height: 64px;
+}
+
+.ctrl-btn--primary:hover {
+  background-color: var(--accent-hover);
+}
+
+/* Botões secundários — volta e reset (cinza escuro) */
+.ctrl-btn:not(.ctrl-btn--primary) {
+  background-color: var(--btn-secondary-bg);
+  color: var(--btn-secondary-fg);
+}
+
+.ctrl-btn:not(.ctrl-btn--primary):hover {
+  background-color: var(--btn-hover-bg);
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TABELA DE VOLTAS
+════════════════════════════════════════════════════════════ */
+.lap-table {
+  width: 100%;
+  max-width: 680px;
+  animation: pageEnter var(--duration-base) var(--ease-out);
+}
+
+/* Cabeçalho da tabela */
+.lap-table-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 0 var(--space-2) var(--space-2);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+/* Corpo da tabela */
+.lap-table-body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Linha de volta */
+.lap-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  padding: var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-base);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  transition: background-color var(--duration-fast) var(--ease-default);
+}
+
+.lap-row:hover {
+  background-color: var(--bg-surface-2);
+}
+
+/* Número da volta */
+.lap-number {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-primary);
+}
+
+/* Labels "Mais rápida" / "Mais lento" */
+.lap-label {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+}
+
+.lap-label--fast {
+  background-color: rgba(92, 184, 92, 0.15);
+  color: #5cb85c;
+}
+
+.lap-label--slow {
+  background-color: rgba(226, 75, 74, 0.12);
+  color: var(--danger);
+}
+
+/* Tempo parcial e total */
+.lap-time,
+.lap-total {
+  color: var(--text-secondary);
+  font-size: var(--fs-base);
+}
