@@ -1,7 +1,8 @@
+mod state;
 mod commands;
-
 fn main() {
     tauri::Builder::default()
+        .manage(state::AppState::new())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_store::Builder::default().build())
