@@ -31,8 +31,7 @@
 /* Países do mapa */
 .mapa-pais {
   fill: #3a3a38;
-  stroke: #2a2a28;
-  stroke-width: 0.5;
+  stroke: none;
   transition: fill var(--duration-fast) var(--ease-default);
 }
 

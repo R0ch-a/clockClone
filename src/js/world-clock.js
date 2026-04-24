@@ -11,7 +11,7 @@ import * as topojson from 'topojson-client';
    CONSTANTES
 ════════════════════════════════════════════════════════════ */
 const WORLD_ATLAS_URL =
-  'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
+  'https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json';
 
 // Cidades pré-carregadas (hora local sempre incluída)
 const CIDADES_INICIAIS = [
@@ -147,16 +147,25 @@ function criarProjecao(largura, altura) {
 /**
  * Converte uma geometria GeoJSON em path SVG usando a projeção.
  */
-function geometriaParaPath(geometria, proj) {
+function geometriaParaPath(geometria, proj, largura = 980) {
   if (!geometria) return '';
 
   function anel(coords) {
-    return coords
-      .map(([lng, lat], i) => {
-        const [x, y] = proj([lng, lat]);
-        return `${i === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`;
-      })
-      .join(' ') + ' Z';
+    const pontos = [];
+    for (let i = 0; i < coords.length; i++) {
+      const [x, y] = proj(coords[i]);
+      if (i > 0) {
+        const [xAnterior] = proj(coords[i - 1]);
+        if (Math.abs(x - xAnterior) > largura / 2) {
+          if (pontos.length > 0) pontos.push('Z');
+          pontos.push(`M${x.toFixed(2)},${y.toFixed(2)}`);
+          continue;
+        }
+      }
+      const cmd = (i === 0 || pontos[pontos.length - 1] === 'Z') ? 'M' : 'L';
+      pontos.push(`${cmd}${x.toFixed(2)},${y.toFixed(2)}`);
+    }
+    return pontos.join(' ') + ' Z';
   }
 
   function polygonParaPath(poly) {
@@ -183,6 +192,7 @@ async function renderizarMapa() {
   svg.setAttribute('viewBox', `0 0 ${LARGURA} ${ALTURA}`);
   svg.setAttribute('class', 'world-map-svg');
   svg.setAttribute('aria-hidden', 'true');
+  svg.style.overflow = 'hidden';
 
   // Fundo do oceano
   const fundo = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -191,9 +201,21 @@ async function renderizarMapa() {
   fundo.setAttribute('fill', 'transparent');
   svg.appendChild(fundo);
 
+  // Define área de recorte
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  const clipPath = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+  clipPath.setAttribute('id', 'mapaClip');
+  const clipRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  clipRect.setAttribute('width', LARGURA);
+  clipRect.setAttribute('height', ALTURA);
+  clipPath.appendChild(clipRect);
+  defs.appendChild(clipPath);
+  svg.appendChild(defs);
+
   // Grupo dos países
   const grupoMapa = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   grupoMapa.setAttribute('class', 'mapa-paises');
+  grupoMapa.setAttribute('clip-path', 'url(#mapaClip)');
 
   // Grupo dos pins (fica acima dos países)
   const grupoPins = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -201,16 +223,22 @@ async function renderizarMapa() {
   grupoPins.setAttribute('id', 'mapaPins');
 
   try {
-    const resp  = await fetch(WORLD_ATLAS_URL);
+    const resp  = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
     const mundo = await resp.json();
-
-    // Converte topojson → geojson
-    const paises = topojson.feature(mundo, mundo.objects.countries);
 
     projection = criarProjecao(LARGURA, ALTURA);
 
+    const paises = topojson.feature(mundo, mundo.objects.countries);
+
     paises.features.forEach(feature => {
-      const d = geometriaParaPath(feature.geometry, projection);
+      // Ignora geometrias que não são polígonos (linhas de grade, etc.)
+      if (!feature.geometry) return;
+      if (
+        feature.geometry.type !== 'Polygon' &&
+        feature.geometry.type !== 'MultiPolygon'
+      ) return;
+
+      const d = geometriaParaPath(feature.geometry, projection, LARGURA);
       if (!d) return;
 
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -218,9 +246,9 @@ async function renderizarMapa() {
       path.setAttribute('class', 'mapa-pais');
       grupoMapa.appendChild(path);
     });
+
   } catch (err) {
     console.warn('[world-clock] Não foi possível carregar o mapa:', err);
-    // Exibe mensagem de fallback
     const texto = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     texto.setAttribute('x', LARGURA / 2);
     texto.setAttribute('y', ALTURA / 2);

@@ -162,17 +162,25 @@ async function limparHistorico() {
   if (!confirmado) return;
 
   try {
-    // Limpa localStorage
     localStorage.clear();
-
-    // Notifica o backend para limpar o store.json
     await invoke('clear_history');
   } catch (err) {
     console.warn('[settings] Erro ao limpar histórico:', err);
   }
 
-  // Recarrega a página para resetar o estado em memória
-  window.location.reload();
+  // Feedback visual — mostra ✓ temporariamente no botão
+  const btn = document.getElementById('btnClearHistory');
+  if (btn) {
+    const textoOriginal = btn.textContent;
+    btn.textContent = '✓ Limpo';
+    btn.style.color = 'var(--accent)';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = textoOriginal;
+      btn.style.color = '';
+      btn.disabled = false;
+    }, 3000);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
