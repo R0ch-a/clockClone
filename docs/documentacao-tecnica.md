@@ -1,5 +1,5 @@
 # Documentação Técnica — clockClone
-**Versão:** 1.0  
+**Versão:** 2.0  
 **Data:** 23/04/2026  
 **Autor:** Rafael Rocha  
 **Repositório:** https://github.com/R0ch-a/clockClone  
@@ -17,9 +17,10 @@
 7. [Backend Rust — Arquivos e Responsabilidades](#7-backend-rust--arquivos-e-responsabilidades)
 8. [Módulos Implementados](#8-módulos-implementados)
 9. [Design System](#9-design-system)
-10. [Decisões Técnicas e Problemas Resolvidos](#10-decisões-técnicas-e-problemas-resolvidos)
-11. [Histórico de Commits](#11-histórico-de-commits)
-12. [Próximos Passos](#12-próximos-passos)
+10. [Testes](#10-testes)
+11. [Decisões Técnicas e Problemas Resolvidos](#11-decisões-técnicas-e-problemas-resolvidos)
+12. [Histórico de Commits](#12-histórico-de-commits)
+13. [Próximos Passos](#13-próximos-passos)
 
 ---
 
@@ -100,16 +101,29 @@ clockClone/
 │   ├── icons/                    # Ícones do app
 │   └── src/
 │       ├── main.rs               # Entrada do app, setup do Tauri
+│       ├── lib.rs                # Exposição de módulos públicos para testes
 │       ├── commands.rs           # Comandos expostos ao frontend via invoke()
 │       ├── state.rs              # AppState e modelos de dados
 │       ├── alarm_scheduler.rs    # Thread de verificação de alarmes
 │       └── audio.rs              # Reprodução de sons via rodio
 │
+├── tests/
+│   ├── unit/
+│   │   ├── timer.test.js         # 37 testes do Temporizador
+│   │   ├── stopwatch.test.js     # 34 testes do Cronômetro
+│   │   ├── world-clock.test.js   # 38 testes do Relógio Mundial
+│   │   ├── alarm.test.js         # 47 testes do Alarme
+│   │   └── settings.test.js      # 46 testes das Configurações
+│   └── rust/
+│       └── commands_test.rs      # 31 testes do backend Rust
+│
 ├── docs/
 │   ├── plano-projeto-relogio-win11.md  # Plano de projeto completo (v1.4)
-│   └── documentacao-tecnica.md         # Este arquivo
+│   └── documentacao-tecnica.md         # Este arquivo (v2.0)
 │
-├── vite.config.js                # Configuração do Vite (root: src/)
+├── README.md                     # Documentação principal do repositório
+├── vite.config.js                # Configuração do Vite (root: src/, test: tests/)
+├── .gitignore                    # Arquivos ignorados pelo Git
 └── package.json
 ```
 
@@ -462,7 +476,57 @@ Reprodução de sons via `rodio`:
 
 ---
 
-## 10. Decisões Técnicas e Problemas Resolvidos
+## 10. Testes
+
+### 10.1 Testes JavaScript — Vitest
+
+**Configuração:** `vite.config.js` com `test.root: '.'` e `test.include: ['tests/**/*.test.js']`
+
+**Rodar:** `npm test` na raiz do projeto
+
+| Arquivo | Casos | Módulo |
+|---------|-------|--------|
+| `timer.test.js` | 37 | Temporizador |
+| `stopwatch.test.js` | 34 | Cronômetro |
+| `world-clock.test.js` | 38 | Relógio Mundial |
+| `alarm.test.js` | 47 | Alarme |
+| `settings.test.js` | 46 | Configurações |
+| **Total** | **202** | |
+
+**O que cada arquivo testa:**
+
+`timer.test.js` — `formatarTempoTimer`, `pad`, `calcularDashoffset` (anel SVG), `sugerirNome`, `validarTempo`, incremento/decremento do picker e cálculo de duração total.
+
+`stopwatch.test.js` — `parseTempo`, `formatarTempo`, `atualizarLabelsVolta` (Mais rápida/Mais lento), `registrarVolta`, `redefinir` e visibilidade da tabela de voltas.
+
+`world-clock.test.js` — `getHoraEmTimezone`, `getDataEmTimezone`, `getDiferencaFuso`, `isDia` (limites exatos 6h-20h), `criarProjecao` (mapa SVG com coordenadas reais) e `buscarCidade`.
+
+`alarm.test.js` — `sugerirNome`, `deveDisparar` (com filtro de dias), `alternarDia` (imutabilidade), `validarHorario`, `formatarHorario`, `tempoAteAlarme` (singular/plural, avanço de dia), array DIAS e picker de alarme.
+
+`settings.test.js` — `temaValido`, `aplicarTema` (com `prefers-color-scheme`), `nomeTema`, `carregarTema`, `salvarTema`, `alterarTema`, constantes TEMAS/NOMES_TEMA/STORAGE_KEY e fluxo completo de troca de tema.
+
+### 10.2 Testes Rust — cargo test
+
+**Rodar:** `cargo test` dentro de `src-tauri/`
+
+| Arquivo | Casos | Cobertura |
+|---------|-------|-----------|
+| `commands_test.rs` | 31 | `state.rs`, `commands.rs`, scheduler |
+
+**O que está testado:**
+
+- **Versão do app** — não vazia e formato semver válido
+- **AppState** — `new()` vazio, tema padrão `System`, `from_store()` preserva dados, acesso thread-safe via Mutex
+- **Alarm** — roundtrip JSON, 7 dias, dias vazios = todo dia, formato `HH:MM`, desabilitado não dispara
+- **City** — roundtrip JSON, coordenadas de São Paulo (sul/oeste), timezone IANA
+- **TimerConfig** — roundtrip JSON, 20min = 1200s, duração positiva
+- **Theme** — padrão `System`, serialização `"dark"/"light"/"system"`, deserialização
+- **StoredState** — default vazio, roundtrip JSON, JSON parcial usa defaults, conversão `into()` para AppState
+- **Scheduler** — desabilitado não dispara, horário errado, correto dispara, dias vazios = todo dia, dia errado bloqueia
+
+---
+
+## 11. Decisões Técnicas e Problemas Resolvidos
 
 ### Caminho com `#` quebrava o Vite
 **Problema:** O projeto estava em `project#l1sbeth` — o `#` é interpretado como fragmento de URL pelo bundler.  
@@ -500,9 +564,37 @@ Reprodução de sons via `rodio`:
 **Problema:** Múltiplas entradas de `tauri`, `serde` e `serde_json` causavam erro de parse.  
 **Solução:** Manter apenas uma entrada por crate, usando a versão mais específica disponível.
 
+### Anel do timer aparecia apenas ao redefinir
+**Problema:** A trilha de fundo do anel SVG usava `var(--ring-fill)` em vez de `var(--ring-track)`, e o `redefinirTimer()` mudava a cor para cinza — fazendo o anel dourado aparecer apenas ao redefinir.  
+**Solução:** Trilha de fundo usa `var(--ring-track)` (cinza), anel de progresso usa `var(--ring-fill)` (dourado) desde a criação. Reset visual aplica `var(--ring-fill)` (não cinza) ao redefinir.
+
+### Cards do timer sem bordas arredondadas
+**Problema:** O grid usava `gap: 1px` com `background-color: var(--border)` para criar divisórias — essa técnica remove o `border-radius` dos cards nas bordas externas.  
+**Solução:** Substituir por `gap: var(--space-3)` com `padding: var(--space-3)` e `background-color: var(--bg-app)`, mantendo `border-radius` visível em todos os cards.
+
+### Vitest não encontrava os arquivos de teste
+**Problema:** `vite.config.js` tinha `root: 'src'`, fazendo o Vitest procurar testes dentro de `src/`.  
+**Solução:** Adicionar seção `test` no `vite.config.js` com `root: '.'` e `include: ['tests/**/*.test.js']`.
+
+### Doctest do `audio.rs` falhava no `cargo test`
+**Problema:** O comentário da função `tocar()` tinha um bloco de código que o Rust tentava compilar como doctest — mas sem o contexto do módulo, o `audio::tocar()` não resolvia.  
+**Solução:** Remover o bloco de exemplo do comentário da função.
+
+### `@tauri-apps/plugin-shell` não instalado
+**Problema:** O `settings.js` importava `@tauri-apps/plugin-shell` que não estava instalado, causando erro no Vite.  
+**Solução:** `npm install @tauri-apps/plugin-shell` e adicionar `tauri-plugin-shell = "2"` no `Cargo.toml`.
+
+### `.gitignore` com erro de digitação
+**Problema:** `.gitignore` tinha `node.modules/` (com ponto) em vez de `node_modules/` (com underline).  
+**Solução:** Corrigir a entrada e adicionar outras entradas importantes (`.env`, logs, arquivos de editor, sistema operacional e `WixTools`).
+
+### Modal do alarme usava `prompt()` nativo
+**Problema:** A primeira versão do `alarm.js` usava `prompt()` do browser para adicionar e editar alarmes — solução temporária e visualmente inconsistente com o resto do app.  
+**Solução:** Reescrever o `alarm.js` (v2) com modal visual completo criado dinamicamente via JavaScript, incluindo seletor `hh:mm`, campo de nome, checkbox "Repetir alarme", pílulas de dias, dropdown de som e soneca.
+
 ---
 
-## 11. Histórico de Commits
+## 12. Histórico de Commits
 
 | Commit | Descrição |
 |--------|-----------|
@@ -522,27 +614,30 @@ Reprodução de sons via `rodio`:
 | `feat: rewrite alarm module with full modal` | `alarm.js` v2 com modal visual completo |
 | `fix: timer ring now starts full and golden` | Correção do anel SVG do temporizador |
 | `fix: stop toggle click from opening alarm edit modal` | `stopPropagation` no toggle do alarme |
+| `feat: add unit tests for all modules` | 202 testes JS + 31 testes Rust |
+| `docs: add README.md and remaining unit tests` | `README.md`, `alarm.test.js`, `settings.test.js` |
+| `chore: fix .gitignore typo and add missing entries` | Correção do `.gitignore` |
 
 ---
 
-## 12. Próximos Passos
+## 13. Próximos Passos
 
 ### Funcionalidades pendentes
 - [ ] Persistência completa via `tauri-plugin-store` (alarmes, timers, cidades, tema)
-- [ ] Integração do evento `alarm_fired` do Rust com o frontend
-- [ ] Som diferente por alarme (usando o campo `sound` já salvo)
-- [ ] Soneca funcional (campo `snooze` já salvo)
+- [ ] Integração do evento `alarm_fired` do Rust com o `alarm.js` via `onAlarmeFired()` do `tauri-bridge.js`
+- [ ] Som diferente por alarme (campo `sound` já salvo no estado)
+- [ ] Soneca funcional (campo `snooze` já salvo no estado)
 - [ ] Busca com autocomplete no modal de adicionar cidade
 - [ ] Sessões de concentração (Focus Sessions) — fora do escopo v1.0
 
 ### Melhorias técnicas
 - [ ] Substituir `localStorage` por `tauri-plugin-store` no `settings.js`
-- [ ] Testes unitários com Vitest (JavaScript) e `cargo test` (Rust)
 - [ ] Build de produção e geração do instalador `.exe`
 - [ ] Ícone personalizado do app (substituir o padrão do Tauri)
 - [ ] Suporte a tema claro completo (revisar contrastes)
+- [ ] Aumentar cobertura de testes com casos de erro e edge cases
 
 ### Qualidade
 - [ ] Remover `#[allow(dead_code)]` conforme campos forem usados
-- [ ] Substituir `prompt()` nativo por modal visual no fluxo de edição de alarme futuro
 - [ ] Adicionar `aria-live` nas regiões que atualizam dinamicamente (cronômetro, countdown)
+- [ ] Revisar acessibilidade dos modais (foco ao abrir, ESC fecha, trap de foco)
