@@ -4,6 +4,8 @@
    sidebar está marcado como ativo.
 ════════════════════════════════════════════════════════════ */
 
+import { getCurrentWindow } from '@tauri-apps/api/window';
+
 // ── Páginas disponíveis (devem bater com os IDs do HTML) ──
 const PAGES = [
   'world-clock',
@@ -102,6 +104,20 @@ export function iniciarRouter() {
 
   // Navega para a página padrão ao iniciar
   navegarPara(DEFAULT_PAGE);
+
+  const appWindow = getCurrentWindow();
+
+  document.getElementById('min')
+    ?.addEventListener('click', () => appWindow.minimize());
+
+  document.getElementById('max')
+    ?.addEventListener('click', async () => {
+      const maximized = await appWindow.isMaximized();
+      maximized ? appWindow.unmaximize() : appWindow.maximize();
+    });
+
+  document.getElementById('close')
+    ?.addEventListener('click', () => appWindow.close());
 }
 
 /* ═══════════════════════════════════════════════════════════

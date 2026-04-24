@@ -13,14 +13,14 @@
   <link rel="stylesheet" href="style/settings.css" />
 </head>
 <body>
-
+  
   <div class="app-shell">
-
+    
     <!-- ═══════════════════════════════════════
          SIDEBAR — navegação lateral
-    ════════════════════════════════════════ -->
-    <aside class="sidebar" id="sidebar">
-
+         ════════════════════════════════════════ -->
+         <aside class="sidebar" id="sidebar">
+           
       <!-- Botão hambúrguer -->
       <button class="sidebar-toggle" id="sidebarToggle" aria-label="Expandir menu" title="Menu">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -32,7 +32,7 @@
 
       <!-- Itens de navegação -->
       <nav class="sidebar-nav" role="navigation" aria-label="Módulos do relógio">
-
+        
         <button class="nav-item" data-page="world-clock" aria-label="Relógio mundial" title="Relógio mundial">
           <span class="nav-accent"></span>
           <svg class="nav-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -75,9 +75,9 @@
           </svg>
           <span class="nav-label">Cronômetro</span>
         </button>
-
+        
       </nav>
-
+      
       <!-- Rodapé da sidebar -->
       <div class="sidebar-footer">
         <button class="nav-item settings-btn" data-page="settings" aria-label="Configurações" title="Configurações">
@@ -89,14 +89,23 @@
           <span class="nav-label">Configurações</span>
         </button>
       </div>
-
+      
     </aside>
-
+    
     <!-- ═══════════════════════════════════════
-         ÁREA DE CONTEÚDO PRINCIPAL
+    ÁREA DE CONTEÚDO PRINCIPAL
     ════════════════════════════════════════ -->
     <main class="content-area" id="contentArea">
-
+      
+      <div class="titlebar" data-tauri-drag-region>
+        <span>🕰️ Relógio</span>
+      
+        <div class="window-controls">
+          <button id="min">─</button>
+          <button id="max">□</button>
+          <button id="close">✕</button>
+        </div>
+      </div>
       <!-- ── Relógio Mundial ── -->
       <section class="page" id="page-world-clock" role="region" aria-label="Relógio mundial">
         <div class="world-map-container">
