@@ -38,23 +38,6 @@
   transition: background-color var(--duration-theme) var(--ease-default);
 }
 
-/* Tooltip "Editar temporizador" — aparece no hover do card */
-.timer-card-tooltip {
-  position: absolute;
-  bottom: var(--space-10);
-  right: var(--space-4);
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--duration-fast) var(--ease-default);
-  white-space: nowrap;
-}
-
-.timer-card:hover .timer-card-tooltip {
-  opacity: 1;
-}
-
 /* Animação de saída ao excluir */
 @keyframes cardSair {
   from {

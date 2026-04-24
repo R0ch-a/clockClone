@@ -344,7 +344,6 @@ function criarCardTimer(timer) {
       </button>
     </div>
 
-    <div class="timer-card-tooltip">Editar temporizador</div>
   `;
 
   // ── Event listeners do card ──
