@@ -37,11 +37,6 @@ pub enum TipoSom {
 ///
 /// # Parâmetros
 /// - `tipo` — `TipoSom::Timer` ou `TipoSom::Alarme`
-///
-/// # Exemplo
-/// ```rust
-/// audio::tocar(audio::TipoSom::Timer);
-/// ```
 pub fn tocar(tipo: TipoSom) {
     let bytes: &'static [u8] = match tipo {
         TipoSom::Timer  => SOM_TIMER,

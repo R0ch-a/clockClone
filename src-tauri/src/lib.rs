@@ -1,3 +1,8 @@
+pub mod state;
+pub mod commands;
+pub mod alarm_scheduler;
+pub mod audio;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
