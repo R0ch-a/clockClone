@@ -32,8 +32,6 @@
   background-color: var(--bg-sidebar);
   border-right: 1px solid var(--border);
   overflow: hidden;
-
-  /* Expansão suave ao abrir o menu hambúrguer */
   transition:
     width            var(--duration-slow) var(--ease-out),
     min-width        var(--duration-slow) var(--ease-out),
@@ -50,13 +48,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  width: var(--sidebar-width-collapsed);
   height: 48px;
   min-height: 48px;
+  flex-shrink: 0;
   color: var(--text-secondary);
-  border-radius: 0;
-  transition: color var(--duration-base) var(--ease-default),
-              background-color var(--duration-base) var(--ease-default);
+  transition:
+    color            var(--duration-base) var(--ease-default),
+    background-color var(--duration-base) var(--ease-default);
 }
 
 .sidebar-toggle:hover {

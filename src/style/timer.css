@@ -17,10 +17,10 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-3);
-  flex: 1;
-  overflow: hidden;
   padding: var(--space-3);
   background-color: var(--bg-app);
+  overflow-y: auto;  /* ← mude de hidden para auto */
+  flex: 1;
 }
 
 /* ═══════════════════════════════════════════════════════════
