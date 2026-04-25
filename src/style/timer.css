@@ -300,3 +300,37 @@
   color: var(--text-primary);
   background-color: var(--bg-surface-2);
 }
+
+.timer-card.timer-expandido {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  border-radius: 0;
+  border: none;
+  padding: var(--space-6);
+  background-color: var(--bg-app);
+  justify-content: center;
+}
+
+.timer-card.timer-expandido .timer-ring-svg {
+  width: min(380px, 60vw, 60vh);
+  height: min(380px, 60vw, 60vh);
+}
+
+.timer-card.timer-expandido .timer-display {
+  font-size: clamp(32px, 5vw, 56px);
+}
+
+.timer-card.timer-expandido .timer-controls {
+  margin-top: var(--space-6);
+}
+
+.timer-card.timer-expandido .timer-controls .ctrl-btn {
+  width: 52px;
+  height: 52px;
+}
+
+.timer-card.timer-expandido .timer-controls .ctrl-btn--primary {
+  width: 60px;
+  height: 60px;
+}

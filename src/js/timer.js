@@ -37,16 +37,6 @@ const timerGrid       = document.getElementById('timerGrid');
 const btnEditTimers   = document.getElementById('btnEditTimers');
 const btnAddTimer     = document.getElementById('btnAddTimer');
 
-// Modal
-const modalOverlay    = document.getElementById('modalTimerOverlay');
-const btnSaveTimer    = document.getElementById('btnSaveTimer');
-const btnCancelTimer  = document.getElementById('btnCancelTimer');
-const timerNameInput  = document.getElementById('timerNameInput');
-const btnClearName    = document.getElementById('btnClearTimerName');
-const pickHours       = document.getElementById('pickHours');
-const pickMinutes     = document.getElementById('pickMinutes');
-const pickSeconds     = document.getElementById('pickSeconds');
-
 /* ═══════════════════════════════════════════════════════════
    UTILITÁRIOS
 ════════════════════════════════════════════════════════════ */
@@ -264,6 +254,14 @@ async function alternarPin(btnPinEl) {
   }
 }
 
+function svgExpandir() {
+  return '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 2h4v4M6 14H2v-4M14 2l-5 5M2 14l5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function svgRecolher() {
+  return '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 2l-4 4M2 2h4v4M10 14l4-4M14 14h-4v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
 /* ═══════════════════════════════════════════════════════════
    CRIAÇÃO DO CARD HTML DE UM TIMER
 ════════════════════════════════════════════════════════════ */
@@ -377,8 +375,11 @@ function criarCardTimer(timer) {
     // Fecha qualquer outro expandido
     document.querySelectorAll('.timer-expandido').forEach(c => {
       c.classList.remove('timer-expandido');
+      const exp = c.querySelector('.timer-btn-expand');
+      if (exp) exp.innerHTML = svgExpandir();
+      c.querySelector('.timer-btn-pin')?.style.removeProperty('display');
     });
-  
+
     if (!jaExpandido) {
       card.classList.add('timer-expandido');
       sidebar?.style.setProperty('width', '0');
@@ -387,6 +388,8 @@ function criarCardTimer(timer) {
       sidebar?.style.setProperty('overflow', 'hidden');
       timerGrid?.style.setProperty('display', 'block');
       actionBar?.classList.add('hidden');
+      card.querySelector('.timer-btn-pin')?.style.setProperty('display', 'none');
+      btnExpand.innerHTML = svgRecolher();
     } else {
       sidebar?.style.removeProperty('width');
       sidebar?.style.removeProperty('min-width');
@@ -406,6 +409,12 @@ function criarCardTimer(timer) {
     e.stopPropagation();
     excluirTimer(timer.id);
   });
+
+  card.addEventListener('click', (e) => {
+    if (editMode) return;
+    if (e.target.closest('button')) return; // ignora cliques em botões
+    abrirModalEdicao(timer.id);
+  });  
 
   return card;
 }
@@ -492,6 +501,13 @@ function excluirTimer(id) {
   }
 }
 
+function resetarModal() {
+  const modalTitle = document.getElementById('modalTimerTitle');
+  if (modalTitle) modalTitle.textContent = 'Adicionar novo temporizador';
+  const lixeira = document.querySelector('.timer-modal-delete');
+  lixeira?.remove();
+}
+
 /* ═══════════════════════════════════════════════════════════
    MODAL — Adicionar novo temporizador
 ════════════════════════════════════════════════════════════ */
@@ -500,6 +516,10 @@ function excluirTimer(id) {
 const pick = { hours: 0, minutes: 0, seconds: 0 };
 
 function abrirModal() {
+  const timerNameInput = document.getElementById('timerNameInput');
+  const btnClearName   = document.getElementById('btnClearTimerName');
+  const modalOverlay   = document.getElementById('modalTimerOverlay');
+
   // Reseta o seletor
   pick.hours   = 0;
   pick.minutes = 0;
@@ -516,10 +536,17 @@ function abrirModal() {
 }
 
 function fecharModal() {
-  modalOverlay?.classList.add('hidden');
+  document.getElementById('modalTimerOverlay')?.classList.add('hidden');
+  resetarModal();
+  //modalOverlay?.classList.add('hidden');
 }
 
 function atualizarPickerDisplay() {
+  const pickHours   = document.getElementById('pickHours');
+  const pickMinutes = document.getElementById('pickMinutes');
+  const pickSeconds = document.getElementById('pickSeconds');
+  const btnSaveTimer = document.getElementById('btnSaveTimer');
+
   if (pickHours)   pickHours.textContent   = pad(pick.hours);
   if (pickMinutes) pickMinutes.textContent = pad(pick.minutes);
   if (pickSeconds) pickSeconds.textContent = pad(pick.seconds);
@@ -551,29 +578,101 @@ function salvarTimer() {
   const totalSeg = pick.hours * 3600 + pick.minutes * 60 + pick.seconds;
   if (totalSeg === 0) return;
 
-  const label = timerNameInput?.value.trim() || sugerirNome();
-  const id    = gerarId();
+  const timerNameInput = document.getElementById('timerNameInput');
+  const label          = timerNameInput?.value.trim() || sugerirNome();
+  const modalEl        = document.getElementById('modalTimer');
+  const editandoId     = modalEl?.getAttribute('data-editing-id');
 
-  const novoTimer = { id, label, durationSecs: totalSeg };
-  timers.push(novoTimer);
-
-  // Inicializa estado em tempo real
-  timerStates[id] = {
-    remaining:        totalSeg,
-    remainingOnPause: totalSeg,
-    running:          false,
-    rafId:            null,
-    startedAt:        0,
-  };
+  if (editandoId) {
+    const timer = timers.find(t => t.id === editandoId);
+    if (timer) {
+      timer.label        = label;
+      timer.durationSecs = totalSeg;
+      const st = timerStates[editandoId];
+      if (st && !st.running) {
+        st.remaining        = totalSeg;
+        st.remainingOnPause = totalSeg;
+      }
+    }
+    modalEl?.removeAttribute('data-editing-id');
+    resetarModal();
+  } else {
+    const id = gerarId();
+    timers.push({ id, label, durationSecs: totalSeg });
+    timerStates[id] = {
+      remaining: totalSeg, remainingOnPause: totalSeg,
+      running: false, rafId: null, startedAt: 0,
+    };
+  }
 
   fecharModal();
   renderizarGrid();
 }
 
 /* ═══════════════════════════════════════════════════════════
+   MODAL — Adicionar novo temporizador
+════════════════════════════════════════════════════════════ */
+
+function abrirModalEdicao(id) {
+  const timer = timers.find(t => t.id === id);
+  if (!timer) return;
+
+  const timerNameInput = document.getElementById('timerNameInput');
+  const btnClearName   = document.getElementById('btnClearTimerName');
+
+  pick.hours   = Math.floor(timer.durationSecs / 3600);
+  pick.minutes = Math.floor((timer.durationSecs % 3600) / 60);
+  pick.seconds = timer.durationSecs % 60;
+  atualizarPickerDisplay();
+
+  if (timerNameInput) {
+    timerNameInput.value = timer.label;
+    btnClearName?.classList.remove('hidden');
+  }
+
+  const modalTitle = document.getElementById('modalTimerTitle');
+  if (modalTitle) modalTitle.textContent = 'Editar temporizador';
+
+  const modalEl = document.getElementById('modalTimer');
+  let lixeira = modalEl?.querySelector('.timer-modal-delete');
+  if (!lixeira && modalEl) {
+    lixeira = document.createElement('button');
+    lixeira.className = 'timer-modal-delete';
+    lixeira.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+        <path d="M2 4h12M5 4V2.5h6V4M6 7v5M10 7v5M3 4l1 9.5h8L13 4"
+          stroke="var(--danger)" stroke-width="1.4"
+          stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+    lixeira.style.cssText = `
+      position: absolute; top: var(--space-5); right: var(--space-5);
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      color: var(--danger); cursor: pointer;`;
+    modalEl.style.position = 'relative';
+    modalEl.appendChild(lixeira);
+  }
+
+  lixeira?.addEventListener('click', () => {
+    excluirTimer(id);
+    fecharModal();
+    resetarModal();
+  });
+
+  modalEl?.setAttribute('data-editing-id', id);
+  document.getElementById('modalTimerOverlay')?.classList.remove('hidden');
+}
+
+/* ═══════════════════════════════════════════════════════════
    LIGAÇÃO DOS EVENT LISTENERS DO MODAL
 ════════════════════════════════════════════════════════════ */
 function ligarModal() {
+  const btnSaveTimer  = document.getElementById('btnSaveTimer');
+  const btnCancelTimer = document.getElementById('btnCancelTimer');
+  const modalOverlay  = document.getElementById('modalTimerOverlay');
+  const timerNameInput = document.getElementById('timerNameInput');
+  const btnClearName  = document.getElementById('btnClearTimerName');
+
   btnSaveTimer?.addEventListener('click',   salvarTimer);
   btnCancelTimer?.addEventListener('click', fecharModal);
 
@@ -621,6 +720,15 @@ export function iniciarTimer_modulo() {
 
   ligarModal();
   atualizarPickerDisplay();
+
+  // Timer padrão de 20 minutos
+  const idPadrao = gerarId();
+  timers.push({ id: idPadrao, label: 'Cronômetro (1)', durationSecs: 1200 });
+  timerStates[idPadrao] = {
+    remaining: 1200, remainingOnPause: 1200,
+    running: false, rafId: null, startedAt: 0,
+  };
+
   renderizarGrid();
 }
 

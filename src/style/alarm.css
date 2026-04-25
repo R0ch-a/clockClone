@@ -385,3 +385,35 @@
   color: var(--accent-hover);
   text-decoration: underline;
 }
+
+.modal-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-5);
+}
+
+.modal-title-row .modal-title {
+  margin-bottom: 0;
+}
+
+.alarm-modal-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  color: var(--danger);
+  transition:
+    background-color var(--duration-fast) var(--ease-default),
+    transform        var(--duration-fast) var(--ease-default);
+}
+
+.alarm-modal-delete-btn:hover {
+  background-color: var(--danger-dim);
+}
+
+.alarm-modal-delete-btn:active {
+  transform: scale(0.9);
+}

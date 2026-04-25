@@ -5,6 +5,7 @@
 ════════════════════════════════════════════════════════════ */
 
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { carregarDados } from './tauri-bridge.js';
 
 // ── Páginas disponíveis (devem bater com os IDs do HTML) ──
 const PAGES = [
@@ -79,7 +80,13 @@ export function paginaAtual() {
    Liga os event listeners da sidebar e exibe a
    página padrão. Deve ser chamado uma única vez.
 ════════════════════════════════════════════════════════════ */
-export function iniciarRouter() {
+export async function iniciarRouter() {
+  // Carrega dados persistidos
+  const dados = await carregarDados();
+  if (dados) {
+    window.dispatchEvent(new CustomEvent('dados-carregados', { detail: dados }));
+  }
+
   // Clique em cada item de navegação
   document.querySelectorAll('.nav-item[data-page]').forEach(item => {
     item.addEventListener('click', () => {
@@ -88,9 +95,9 @@ export function iniciarRouter() {
     });
   });
 
-  // Botão hambúrguer — expande/colapsa a sidebar
-  const sidebar       = document.getElementById('sidebar');
-  const toggleBtn     = document.getElementById('sidebarToggle');
+  // Botão hambúrguer
+  const sidebar   = document.getElementById('sidebar');
+  const toggleBtn = document.getElementById('sidebarToggle');
 
   if (toggleBtn && sidebar) {
     toggleBtn.addEventListener('click', () => {
@@ -102,7 +109,6 @@ export function iniciarRouter() {
     });
   }
 
-  // Navega para a página padrão ao iniciar
   navegarPara(DEFAULT_PAGE);
 
   const appWindow = getCurrentWindow();

@@ -180,3 +180,40 @@ export async function onAlarmeFired(callback) {
     return () => {};
   }
 }
+
+export async function carregarDados() {
+  if (!IS_TAURI) return null;
+  try {
+    return await invoke('carregar_dados');
+  } catch (err) {
+    console.warn('[bridge] carregarDados:', err);
+    return null;
+  }
+}
+
+export async function salvarAlarmes(alarmes) {
+  if (!IS_TAURI) return;
+  try {
+    await invoke('salvar_alarmes', { alarmes });
+  } catch (err) {
+    console.warn('[bridge] salvarAlarmes:', err);
+  }
+}
+
+export async function salvarTimers(timers) {
+  if (!IS_TAURI) return;
+  try {
+    await invoke('salvar_timers', { timers });
+  } catch (err) {
+    console.warn('[bridge] salvarTimers:', err);
+  }
+}
+
+export async function salvarCidades(cities) {
+  if (!IS_TAURI) return;
+  try {
+    await invoke('salvar_cidades', { cities });
+  } catch (err) {
+    console.warn('[bridge] salvarCidades:', err);
+  }
+}

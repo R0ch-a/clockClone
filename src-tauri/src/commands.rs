@@ -18,6 +18,103 @@
 /// ```
 
 use crate::audio;
+use crate::state::{AppState, Alarm, City, TimerConfig, StoredState};
+use tauri::State;
+use tauri_plugin_store::StoreExt;
+
+/// Carrega todos os dados do store.json ao iniciar o app
+#[tauri::command]
+pub async fn carregar_dados(app: tauri::AppHandle) -> Result<StoredState, String> {
+    let store = app.store("store.json")
+        .map_err(|e| format!("Erro ao abrir store: {e}"))?;
+
+    let estado = StoredState {
+        alarms: store.get("alarms")
+            .and_then(|v| serde_json::from_value(v).ok())
+            .unwrap_or_default(),
+        timers: store.get("timers")
+            .and_then(|v| serde_json::from_value(v).ok())
+            .unwrap_or_default(),
+        cities: store.get("cities")
+            .and_then(|v| serde_json::from_value(v).ok())
+            .unwrap_or_default(),
+        theme: store.get("theme")
+            .and_then(|v| serde_json::from_value(v).ok())
+            .unwrap_or_default(),
+    };
+
+    Ok(estado)
+}
+
+/// Salva todos os alarmes no store.json
+#[tauri::command]
+pub async fn salvar_alarmes(
+    app:   tauri::AppHandle,
+    state: State<'_, AppState>,
+    alarmes: Vec<Alarm>,
+) -> Result<(), String> {
+    let store = app.store("store.json")
+        .map_err(|e| format!("Erro ao abrir store: {e}"))?;
+
+    store.set("alarms", serde_json::to_value(&alarmes)
+        .map_err(|e| format!("Erro ao serializar: {e}"))?);
+    store.save().map_err(|e| format!("Erro ao salvar: {e}"))?;
+
+    *state.alarms.lock().unwrap() = alarmes;
+    Ok(())
+}
+
+/// Salva todos os timers no store.json
+#[tauri::command]
+pub async fn salvar_timers(
+    app:   tauri::AppHandle,
+    state: State<'_, AppState>,
+    timers: Vec<TimerConfig>,
+) -> Result<(), String> {
+    let store = app.store("store.json")
+        .map_err(|e| format!("Erro ao abrir store: {e}"))?;
+
+    store.set("timers", serde_json::to_value(&timers)
+        .map_err(|e| format!("Erro ao serializar: {e}"))?);
+    store.save().map_err(|e| format!("Erro ao salvar: {e}"))?;
+
+    *state.timers.lock().unwrap() = timers;
+    Ok(())
+}
+
+/// Salva todas as cidades no store.json
+#[tauri::command]
+pub async fn salvar_cidades(
+    app:    tauri::AppHandle,
+    state:  State<'_, AppState>,
+    cities: Vec<City>,
+) -> Result<(), String> {
+    let store = app.store("store.json")
+        .map_err(|e| format!("Erro ao abrir store: {e}"))?;
+
+    store.set("cities", serde_json::to_value(&cities)
+        .map_err(|e| format!("Erro ao serializar: {e}"))?);
+    store.save().map_err(|e| format!("Erro ao salvar: {e}"))?;
+
+    *state.cities.lock().unwrap() = cities;
+    Ok(())
+}
+
+/// Salva o tema no store.json
+#[tauri::command]
+pub async fn salvar_tema(
+    app:    tauri::AppHandle,
+    _state: State<'_, AppState>,  // ← underscore aqui
+    tema:   String,
+) -> Result<(), String> {
+    let store = app.store("store.json")
+        .map_err(|e| format!("Erro ao abrir store: {e}"))?;
+
+    store.set("theme", serde_json::Value::String(tema.clone()));
+    store.save().map_err(|e| format!("Erro ao salvar: {e}"))?;
+
+    Ok(())
+}
 
 #[tauri::command]
 pub async fn send_notification(

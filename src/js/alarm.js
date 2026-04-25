@@ -5,6 +5,20 @@
 ════════════════════════════════════════════════════════════ */
 
 import { invoke } from '@tauri-apps/api/core';
+import { salvarAlarmes } from './tauri-bridge.js';
+
+// Carrega dados ao iniciar
+window.addEventListener('dados-carregados', (e) => {
+  if (e.detail.alarms?.length) {
+    alarmes = e.detail.alarms;
+    renderizarAlarmes();
+  }
+});
+
+// Salva sempre que mudar
+async function persistir() {
+  await salvarAlarmes(alarmes);
+}
 
 /* ═══════════════════════════════════════════════════════════
    CONSTANTES
@@ -140,6 +154,13 @@ function renderizarAlarmes() {
   if (!alarmList) return;
   alarmList.innerHTML = '';
   alarmes.forEach(alarm => alarmList.appendChild(criarCardAlarme(alarm)));
+
+  // Mostra o banner apenas se houver pelo menos um alarme ativo
+  const banner = document.getElementById('alarmBanner');
+  if (banner) {
+    const temAtivo = alarmes.some(a => a.enabled);
+    banner.classList.toggle('hidden', !temAtivo);
+  }
 }
 
 function criarCardAlarme(alarm) {
@@ -198,6 +219,7 @@ function criarCardAlarme(alarm) {
   toggleInput?.addEventListener('change', (e) => {
     e.stopPropagation();
     alternarAlarme(alarm.id, toggleInput.checked);
+    persistir();
   });
 
   // Impede que o clique no toggle abra o modal de edição
@@ -219,6 +241,7 @@ function criarCardAlarme(alarm) {
   btnDelete?.addEventListener('click', (e) => {
     e.stopPropagation();
     excluirAlarme(alarm.id);
+    persistir();
   });
 
   // Clique no card → editar (apenas fora do modo edição)
@@ -298,10 +321,20 @@ function criarModal() {
 
   overlay.innerHTML = `
     <div class="modal modal--alarm" id="modalAlarme">
-      <h2 class="modal-title">
-        ${modalMode === 'add' ? 'Adicionar novo alarme' : 'Editar alarme'}
-      </h2>
-
+      <div class="modal-title-row">
+        <h2 class="modal-title">
+          ${modalMode === 'add' ? 'Adicionar novo alarme' : 'Editar alarme'}
+        </h2>
+        ${modalMode === 'edit' ? `
+          <button class="alarm-modal-delete-btn" id="btnModalDeleteAlarme" aria-label="Excluir alarme">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+              <path d="M2 4h12M5 4V2.5h6V4M6 7v5M10 7v5M3 4l1 9.5h8L13 4"
+                stroke="var(--danger)" stroke-width="1.4"
+                stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        ` : ''}
+      </div>
       <div class="time-picker time-picker--alarm">
         <div class="time-field-wrap">
           <button class="time-arrow time-arrow--up" data-field="hours" aria-label="Aumentar horas">
@@ -453,6 +486,11 @@ function ligarEventosModal(overlay) {
   overlay.querySelector('#btnCancelarAlarme')?.addEventListener('click', fecharModal);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) fecharModal(); });
   document.addEventListener('keydown', onEsc);
+
+  overlay.querySelector('#btnModalDeleteAlarme')?.addEventListener('click', () => {
+    excluirAlarme(editingId);
+    fecharModal();
+  });
 }
 
 function onEsc(e) {
