@@ -600,13 +600,16 @@ export function iniciarAlarme() {
   // Escuta alarmes disparados pelo scheduler Rust
   onAlarmeFired((payload) => {
     enviarNotificacao(payload.label, `Alarme: ${payload.time}`);
-    mostrarBannerAlarme(payload.label);
-
+  
     const alarme = alarmes.find(a => a.id === payload.id);
     if (alarme && !alarme.repeat) {
       alarme.enabled = false;
-      renderizarAlarmes();
+      renderizarAlarmes(); // ← atualiza o toggle E o banner de energia
     }
+  
+    // Mostra banner de parar DEPOIS de renderizar
+    // (o banner de energia já terá sumido se não houver mais ativos)
+    mostrarBannerAlarme(payload.label);
   });
 }
 

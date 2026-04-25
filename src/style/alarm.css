@@ -424,8 +424,9 @@
   gap: var(--space-3);
   padding: var(--space-3) var(--space-5);
   background-color: var(--accent-dim);
-  border-bottom: 1px solid var(--accent);
+  border-top: 1px solid rgba(201, 185, 122, 0.25); /* ← igual ao alarm-banner */
   color: var(--accent);
+  flex-shrink: 0; /* ← adicione */
 }
 
 .alarm-playing-banner span {
