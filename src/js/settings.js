@@ -156,11 +156,6 @@ async function abrirConfigsNotificacao() {
    LIMPAR HISTÓRICO
 ════════════════════════════════════════════════════════════ */
 async function limparHistorico() {
-  const confirmado = confirm(
-    'Isso vai apagar todos os seus alarmes, temporizadores e cidades salvas. Continuar?'
-  );
-  if (!confirmado) return;
-
   try {
     localStorage.clear();
     await invoke('clear_history');
