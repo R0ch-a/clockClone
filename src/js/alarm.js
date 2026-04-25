@@ -6,6 +6,7 @@
 
 import { invoke } from '@tauri-apps/api/core';
 import { salvarAlarmes } from './tauri-bridge.js';
+import { onAlarmeFired, enviarNotificacao } from './tauri-bridge.js';
 
 // Carrega dados ao iniciar
 window.addEventListener('dados-carregados', (e) => {
@@ -598,6 +599,21 @@ export function iniciarAlarme() {
   setInterval(verificarAlarmes, 30_000);
   iniciarAtualizacaoCountdown();
   renderizarAlarmes();
+  
+  // Escuta alarmes disparados pelo scheduler Rust
+  onAlarmeFired((payload) => {
+    // payload = { id, label, time }
+
+    // Toca notificação
+    enviarNotificacao(payload.label, `Alarme: ${payload.time}`);
+
+    // Atualiza o toggle do alarme na tela se ele não for repetido
+    const alarme = alarmes.find(a => a.id === payload.id);
+    if (alarme && !alarme.repeat) {
+      alarme.enabled = false;
+      renderizarAlarmes();
+    }
+  });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
