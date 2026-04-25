@@ -33,6 +33,7 @@ fn main() {
             commands::salvar_timers,
             commands::salvar_cidades,
             commands::salvar_tema,
+            commands::parar_som,
         ])
         .run(tauri::generate_context!())
         .expect("Erro ao iniciar o clockClone");

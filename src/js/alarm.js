@@ -5,8 +5,13 @@
 ════════════════════════════════════════════════════════════ */
 
 import { invoke } from '@tauri-apps/api/core';
-import { salvarAlarmes } from './tauri-bridge.js';
-import { onAlarmeFired, enviarNotificacao } from './tauri-bridge.js';
+import {
+  salvarAlarmes,
+  onAlarmeFired,
+  enviarNotificacao,
+  abrirConfigsEnergia,
+  pararSom,
+} from './tauri-bridge.js';
 
 // Carrega dados ao iniciar
 window.addEventListener('dados-carregados', (e) => {
@@ -67,14 +72,6 @@ const modalState = {
   sound:   'Alarmes',
   snooze:  10,
 };
-
-/* ═══════════════════════════════════════════════════════════
-   ELEMENTOS DO DOM
-════════════════════════════════════════════════════════════ */
-const alarmList        = document.getElementById('alarmList');
-const btnAddAlarm      = document.getElementById('btnAddAlarm');
-const btnEditAlarms    = document.getElementById('btnEditAlarms');
-const btnPowerSettings = document.getElementById('btnPowerSettings');
 
 /* ═══════════════════════════════════════════════════════════
    UTILITÁRIOS
@@ -152,7 +149,9 @@ async function dispararAlarme(alarm) {
    RENDERIZAÇÃO DOS CARDS
 ════════════════════════════════════════════════════════════ */
 function renderizarAlarmes() {
+  const alarmList = document.getElementById('alarmList');
   if (!alarmList) return;
+
   alarmList.innerHTML = '';
   alarmes.forEach(alarm => alarmList.appendChild(criarCardAlarme(alarm)));
 
@@ -564,17 +563,6 @@ function salvarAlarme() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   BANNER
-════════════════════════════════════════════════════════════ */
-async function abrirConfigsEnergia() {
-  try {
-    await invoke('open_power_settings');
-  } catch (err) {
-    console.warn('[alarm] open_power_settings:', err);
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════
    COUNTDOWN
 ════════════════════════════════════════════════════════════ */
 function iniciarAtualizacaoCountdown() {
@@ -592,6 +580,15 @@ function iniciarAtualizacaoCountdown() {
    INICIALIZAÇÃO
 ════════════════════════════════════════════════════════════ */
 export function iniciarAlarme() {
+
+  /* ═══════════════════════════════════════════════════════════
+     ELEMENTOS DO DOM
+  ════════════════════════════════════════════════════════════ */
+  const alarmList        = document.getElementById('alarmList');
+  const btnAddAlarm      = document.getElementById('btnAddAlarm');
+  const btnEditAlarms    = document.getElementById('btnEditAlarms');
+  const btnPowerSettings = document.getElementById('btnPowerSettings');
+
   btnAddAlarm?.addEventListener('click',      () => abrirModal('add'));
   btnEditAlarms?.addEventListener('click',    alternarModoEdicao);
   btnPowerSettings?.addEventListener('click', abrirConfigsEnergia);
@@ -599,15 +596,12 @@ export function iniciarAlarme() {
   setInterval(verificarAlarmes, 30_000);
   iniciarAtualizacaoCountdown();
   renderizarAlarmes();
-  
+
   // Escuta alarmes disparados pelo scheduler Rust
   onAlarmeFired((payload) => {
-    // payload = { id, label, time }
-
-    // Toca notificação
     enviarNotificacao(payload.label, `Alarme: ${payload.time}`);
+    mostrarBannerAlarme(payload.label);
 
-    // Atualiza o toggle do alarme na tela se ele não for repetido
     const alarme = alarmes.find(a => a.id === payload.id);
     if (alarme && !alarme.repeat) {
       alarme.enabled = false;
@@ -619,3 +613,32 @@ export function iniciarAlarme() {
 document.addEventListener('DOMContentLoaded', () => {
   iniciarAlarme();
 });
+
+function mostrarBannerAlarme(label) {
+  // Remove banner anterior se existir
+  document.getElementById('bannerAlarmeTocando')?.remove();
+
+  const banner = document.createElement('div');
+  banner.id = 'bannerAlarmeTocando';
+  banner.className = 'alarm-playing-banner';
+  banner.innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M10 17.5a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M11.5 3.5a5 5 0 0 1 5 5v3.5l1.5 2H2l1.5-2V8.5a5 5 0 0 1 5-5"
+        stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>${label} está tocando</span>
+    <button class="alarm-stop-btn" id="btnPararAlarme">Parar</button>
+  `;
+
+  // Insere ANTES do banner de energia
+  const bannerEnergia = document.getElementById('alarmBanner');
+  bannerEnergia
+    ? bannerEnergia.before(banner)
+    : document.getElementById('page-alarm')?.appendChild(banner);
+
+  document.getElementById('btnPararAlarme')?.addEventListener('click', async () => {
+    await pararSom();
+    banner.remove();
+  });
+}

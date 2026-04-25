@@ -218,3 +218,9 @@ pub async fn clear_history(app: tauri::AppHandle) -> Result<(), String> {
 
     Ok(())
 }
+
+#[tauri::command]
+pub fn parar_som() -> Result<(), String> {
+    crate::audio::parar();
+    Ok(())
+}

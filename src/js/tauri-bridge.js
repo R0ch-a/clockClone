@@ -217,3 +217,12 @@ export async function salvarCidades(cities) {
     console.warn('[bridge] salvarCidades:', err);
   }
 }
+
+export async function pararSom() {
+  if (!IS_TAURI) return;
+  try {
+    await invoke('parar_som');
+  } catch (err) {
+    console.warn('[bridge] pararSom:', err);
+  }
+}

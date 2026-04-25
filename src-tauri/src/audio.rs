@@ -1,43 +1,28 @@
 // ═══════════════════════════════════════════════════════════
 // audio.rs — Reprodução de sons do app
-//
-// Usa a crate `rodio` para tocar arquivos de áudio
-// quando um timer termina ou um alarme dispara.
-// Os sons ficam em src-tauri/sounds/ e são embutidos
-// no binário via include_bytes!() para distribuição.
 // ═══════════════════════════════════════════════════════════
 
 #![allow(dead_code)]
 use rodio::{Decoder, OutputStream, Sink};
 use std::io::Cursor;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
-// ═══════════════════════════════════════════════════════════
-// SONS EMBUTIDOS NO BINÁRIO
-// Os arquivos .mp3 são embutidos em tempo de compilação.
-// Coloque os arquivos em src-tauri/sounds/
-// ═══════════════════════════════════════════════════════════
-static SOM_TIMER: &[u8] = include_bytes!("../sounds/timer-end.mp3");
+static SOM_TIMER: &[u8]  = include_bytes!("../sounds/timer-end.mp3");
 static SOM_ALARME: &[u8] = include_bytes!("../sounds/alarm.mp3");
 
-// ═══════════════════════════════════════════════════════════
-// TIPOS DE SOM
-// ═══════════════════════════════════════════════════════════
+// Flag global para sinalizar parada
+static PARAR_SOM: AtomicBool = AtomicBool::new(false);
+
 pub enum TipoSom {
     Timer,
     Alarme,
 }
 
-// ═══════════════════════════════════════════════════════════
-// REPRODUÇÃO
-// ═══════════════════════════════════════════════════════════
-
-/// Toca um som em uma thread separada para não bloquear.
-/// O som é tocado uma única vez e a thread encerra ao terminar.
-///
-/// # Parâmetros
-/// - `tipo` — `TipoSom::Timer` ou `TipoSom::Alarme`
 pub fn tocar(tipo: TipoSom) {
+    // Reseta a flag antes de tocar
+    PARAR_SOM.store(false, Ordering::SeqCst);
+
     let bytes: &'static [u8] = match tipo {
         TipoSom::Timer  => SOM_TIMER,
         TipoSom::Alarme => SOM_ALARME,
@@ -71,20 +56,32 @@ pub fn tocar(tipo: TipoSom) {
 
         sink.append(source);
 
-        // Toca por no máximo 5 segundos depois para automaticamente
-        std::thread::sleep(Duration::from_secs(45));
-        sink.stop();
+        // Verifica a cada 100ms se deve parar (máximo 45s)
+        let mut elapsed = 0u64;
+        while !sink.empty() && elapsed < 45_000 {
+            if PARAR_SOM.load(Ordering::SeqCst) {
+                sink.stop();
+                log::info!("[audio] Som parado manualmente.");
+                return;
+            }
+            std::thread::sleep(Duration::from_millis(100));
+            elapsed += 100;
+        }
 
+        sink.stop();
         log::info!("[audio] Som reproduzido e parado.");
     });
 }
 
-/// Toca o som de fim de temporizador.
+/// Para o som que estiver tocando.
+pub fn parar() {
+    PARAR_SOM.store(true, Ordering::SeqCst);
+}
+
 pub fn tocar_timer() {
     tocar(TipoSom::Timer);
 }
 
-/// Toca o som de alarme.
 pub fn tocar_alarme() {
     tocar(TipoSom::Alarme);
 }

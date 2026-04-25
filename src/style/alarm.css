@@ -417,3 +417,32 @@
 .alarm-modal-delete-btn:active {
   transform: scale(0.9);
 }
+
+.alarm-playing-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background-color: var(--accent-dim);
+  border-bottom: 1px solid var(--accent);
+  color: var(--accent);
+}
+
+.alarm-playing-banner span {
+  flex: 1;
+  font-size: var(--fs-base);
+}
+
+.alarm-stop-btn {
+  padding: var(--space-1) var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: var(--accent);
+  color: var(--btn-primary-fg);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  transition: background-color var(--duration-fast) var(--ease-default);
+}
+
+.alarm-stop-btn:hover {
+  filter: brightness(1.1);
+}

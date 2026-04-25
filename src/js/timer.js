@@ -7,6 +7,7 @@
 
 import { invoke }          from '@tauri-apps/api/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { pararSom } from './tauri-bridge.js';
 
 /* ═══════════════════════════════════════════════════════════
    CONSTANTES
@@ -173,9 +174,35 @@ function pararTimer(id, terminou = false) {
     if (endTime) endTime.textContent = '';
   }
 
-  if (terminou && timer) dispararNotificacao(timer.label);
+  if (terminou && timer) {
+    dispararNotificacao(timer.label);
+    mostrarBannerTimer(timer.label, timer.id);
+  }
 
   atualizarBotoesCard(id);
+}
+
+function mostrarBannerTimer(label, id) {
+  document.getElementById(`banner-timer-${id}`)?.remove();
+
+  const banner = document.createElement('div');
+  banner.id = `banner-timer-${id}`;
+  banner.className = 'alarm-playing-banner';
+  banner.innerHTML = `
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M10 6v4l2.5 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+    </svg>
+    <span>${label} terminou!</span>
+    <button class="alarm-stop-btn">Parar</button>
+  `;
+
+  document.getElementById('timerActions')?.before(banner);
+
+  banner.querySelector('.alarm-stop-btn')?.addEventListener('click', async () => {
+    await pararSom();
+    banner.remove();
+  });
 }
 
 function redefinirTimer(id) {
