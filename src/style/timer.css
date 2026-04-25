@@ -35,7 +35,13 @@
   align-items: center;
   padding: var(--space-4) var(--space-4) var(--space-5);
   background-color: var(--bg-surface);
+  cursor: pointer;
   transition: background-color var(--duration-theme) var(--ease-default);
+}
+
+.timer-card:hover {
+  background-color: var(--bg-surface-2);
+  border-color: var(--border-strong);
 }
 
 /* Animação de saída ao excluir */

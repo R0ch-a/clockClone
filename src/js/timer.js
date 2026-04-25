@@ -367,12 +367,33 @@ function criarCardTimer(timer) {
 
   btnExpand.addEventListener('click', async (e) => {
     e.stopPropagation();
-    try {
-      const win = getCurrentWindow();
-      const max = await win.isMaximized();
-      max ? await win.unmaximize() : await win.maximize();
-    } catch (err) {
-      console.warn('[timer] expand error:', err);
+    const sidebar = document.getElementById('sidebar');
+    const timerGrid = document.getElementById('timerGrid');
+    const actionBar = document.getElementById('timerActions');
+  
+    // Verifica se já está expandido
+    const jaExpandido = card.classList.contains('timer-expandido');
+  
+    // Fecha qualquer outro expandido
+    document.querySelectorAll('.timer-expandido').forEach(c => {
+      c.classList.remove('timer-expandido');
+    });
+  
+    if (!jaExpandido) {
+      card.classList.add('timer-expandido');
+      sidebar?.style.setProperty('width', '0');
+      sidebar?.style.setProperty('min-width', '0');
+      sidebar?.style.setProperty('border', 'none');
+      sidebar?.style.setProperty('overflow', 'hidden');
+      timerGrid?.style.setProperty('display', 'block');
+      actionBar?.classList.add('hidden');
+    } else {
+      sidebar?.style.removeProperty('width');
+      sidebar?.style.removeProperty('min-width');
+      sidebar?.style.removeProperty('border');
+      sidebar?.style.removeProperty('overflow');
+      timerGrid?.style.removeProperty('display');
+      actionBar?.classList.remove('hidden');
     }
   });
 
