@@ -1,6 +1,6 @@
 # Documentação Técnica — clockClone
-**Versão:** 2.0  
-**Data:** 23/04/2026  
+**Versão:** 3.0  
+**Data:** 25/04/2026  
 **Autor:** Rafael Rocha  
 **Repositório:** https://github.com/R0ch-a/clockClone  
 
@@ -28,15 +28,27 @@
 
 O **clockClone** é um aplicativo desktop para Windows que reproduz fielmente o app **Relógio do Windows 11**, desenvolvido com **Rust + Tauri** no backend e **HTML + CSS + JavaScript** no frontend.
 
-O app possui quatro módulos funcionais:
+O app possui cinco módulos funcionais:
 
 | Módulo | Descrição |
 |--------|-----------|
 | Relógio Mundial | Mapa SVG interativo com pins de cidades e fusos horários |
-| Temporizador | Múltiplos timers simultâneos com anel SVG animado |
-| Alarme | Lista de alarmes com dias da semana, som e soneca |
-| Cronômetro | Contador com voltas, labels de mais rápida/lenta e always-on-top |
+| Temporizador | Múltiplos timers simultâneos com anel SVG animado, modo expandido e PiP |
+| Alarme | Lista de alarmes com dias da semana, som, soneca e modal visual completo |
+| Cronômetro | Contador com voltas, labels de mais rápida/lenta, modo expandido e PiP |
 | Configurações | Tema claro/escuro/sistema, notificações, privacidade e sobre |
+
+### Funcionalidades transversais
+- Titlebar customizada com botões minimizar, maximizar e fechar (decorações nativas desativadas)
+- Sidebar expansível com hambúrguer, brand, ícones animados e usuário no rodapé
+- Modo PiP (Picture-in-Picture) no Temporizador e Cronômetro
+- Modo expandido no Temporizador e Cronômetro
+- Notificações nativas do Windows + sons via `rodio`
+- Tema claro/escuro/sistema com detecção de `prefers-color-scheme`
+- Ícone personalizado no Explorer e barra de tarefas
+
+### Limitação conhecida — Persistência de dados
+Os dados criados pelo usuário (alarmes, timers, cidades do Relógio Mundial) **não são persistidos entre sessões**. O backend Rust possui os comandos de persistência implementados (`carregar_dados`, `salvar_alarmes`, `salvar_timers`, `salvar_cidades`) e o `tauri-bridge.js` tem os wrappers prontos, mas a integração completa com o frontend ainda não foi concluída. Cada vez que o app é aberto, começa com apenas o timer padrão de 20 minutos e a hora local no Relógio Mundial.
 
 ---
 
@@ -386,25 +398,26 @@ Reprodução de sons via `rodio`:
 
 ### 8.1 Relógio Mundial
 - [x] Mapa SVG renderizado com world-atlas + topojson
-- [x] Pins de localização no mapa
+- [x] Pins de localização no mapa com fix do antimeridiano
 - [x] Lista de cidades com hora, data e diferença de fuso
 - [x] Ícones de dia (☀) e noite (🌙)
 - [x] Modal "Adicionar novo local" com busca
 - [x] Modo de edição com lixeira vermelha
 - [x] Atualização automática a cada 30s
-- [ ] Persistência das cidades no store.json
-- [ ] Busca em tempo real com autocomplete
+- [ ] Persistência das cidades no store.json ⚠️ não implementado
 
 ### 8.2 Temporizador
-- [x] Grid 2×2 com múltiplos timers simultâneos
+- [x] Grid 2×N com múltiplos timers simultâneos e scroll
 - [x] Anel SVG dourado animado via stroke-dashoffset
 - [x] Modal com seletor hh:mm:ss por setas
+- [x] Modal de edição ao clicar no card com lixeira vermelha
 - [x] Horário de término previsto durante contagem
 - [x] Modo de edição com lixeira vermelha
-- [x] Notificação nativa ao término
-- [x] Som ao término
-- [x] Always-on-top e expandir
-- [ ] Persistência dos timers no store.json
+- [x] Modo expandido — ocupa a janela inteira sem sidebar
+- [x] Modo PiP — janela menor always-on-top com header customizado
+- [x] Notificação nativa ao término + som
+- [x] Timer padrão de 20 minutos ao abrir o app
+- [ ] Persistência dos timers no store.json ⚠️ não implementado
 
 ### 8.3 Alarme
 - [x] Lista de cards com hora, nome, dias e toggle
@@ -412,11 +425,11 @@ Reprodução de sons via `rodio`:
 - [x] Checkbox "Repetir alarme" com pílulas de dias
 - [x] Dropdown de som e soneca
 - [x] Toggle on/off sem interferir no modal de edição
-- [x] Modo de edição com lixeira vermelha
+- [x] Modo de edição com lixeira vermelha no card e no modal
 - [x] Countdown "em X horas, Y minutos"
-- [x] Banner "Os alarmes soarão apenas quando o PC estiver ativo"
+- [x] Banner visível apenas quando há alarme ativo
 - [x] Notificação nativa ao disparar
-- [ ] Persistência dos alarmes no store.json
+- [ ] Persistência dos alarmes no store.json ⚠️ não implementado
 - [ ] Integração com evento `alarm_fired` do Rust
 
 ### 8.4 Cronômetro
@@ -424,7 +437,8 @@ Reprodução de sons via `rodio`:
 - [x] Play/pause, volta e reset
 - [x] Tabela de voltas com Hora e Total
 - [x] Labels "Mais rápida" e "Mais lento"
-- [x] Always-on-top e expandir
+- [x] Modo expandido — ocupa a janela sem sidebar, voltas somem
+- [x] Modo PiP — janela menor always-on-top
 - [x] Continua em background ao trocar de aba
 
 ### 8.5 Configurações
@@ -432,9 +446,9 @@ Reprodução de sons via `rodio`:
 - [x] Detecção de `prefers-color-scheme`
 - [x] Acordeões de tema e sobre com animação
 - [x] Link para configurações de notificação do Windows
-- [x] Limpar histórico com confirmação
+- [x] Limpar histórico com feedback visual ✓
 - [x] Versão do app via Rust
-- [x] Links externos (Termos, Política, Feedback)
+- [x] Links externos abrindo no browser padrão
 
 ---
 
@@ -617,27 +631,53 @@ Reprodução de sons via `rodio`:
 | `feat: add unit tests for all modules` | 202 testes JS + 31 testes Rust |
 | `docs: add README.md and remaining unit tests` | `README.md`, `alarm.test.js`, `settings.test.js` |
 | `chore: fix .gitignore typo and add missing entries` | Correção do `.gitignore` |
+| `fix: resolve world map horizontal line glitch` | Fix do antimeridiano no mapa SVG |
+| `feat: add custom titlebar with drag and window controls` | Titlebar customizada, decorações desativadas |
+| `feat: add picture-in-picture and expand modes to stopwatch` | PiP e expand no Cronômetro |
+| `feat: timer expand mode, edit modal and default 20min timer` | Modo expandido e edição no Temporizador |
+| `feat: add PiP mode to timer cards` | PiP no Temporizador |
+| `fix: multiple UI improvements` | Scroll no grid, sidebar brand, usuário no rodapé |
+| `docs: add screenshots to README.md` | Screenshots de todos os módulos |
 
 ---
 
-## 13. Próximos Passos
+## 13. Limitações Conhecidas
 
-### Funcionalidades pendentes
-- [ ] Persistência completa via `tauri-plugin-store` (alarmes, timers, cidades, tema)
-- [ ] Integração do evento `alarm_fired` do Rust com o `alarm.js` via `onAlarmeFired()` do `tauri-bridge.js`
+### Persistência de dados não implementada
+O maior gap do projeto é a falta de persistência entre sessões. A infraestrutura está pronta:
+
+**Backend (Rust) — implementado:**
+- `carregar_dados()` — lê `store.json` via `tauri-plugin-store`
+- `salvar_alarmes()`, `salvar_timers()`, `salvar_cidades()`, `salvar_tema()` — gravam no `store.json`
+
+**Frontend (JS) — implementado:**
+- `tauri-bridge.js` tem `carregarDados()`, `salvarAlarmes()`, `salvarTimers()`, `salvarCidades()`
+- `router.js` dispara evento `dados-carregados` ao iniciar
+
+**O que falta:**
+- Cada módulo (`alarm.js`, `timer.js`, `world-clock.js`) precisa escutar `dados-carregados` e carregar os dados
+- Cada ação de salvar/excluir precisa chamar a função de persistência correspondente
+
+**Impacto:** Ao fechar e reabrir o app, todos os alarmes, timers e cidades adicionados são perdidos. Apenas o tema é persistido via `localStorage`.
+
+---
+
+## 14. Próximos Passos
+
+### Alta prioridade
+- [ ] **Persistência completa** — integrar `dados-carregados` em `alarm.js`, `timer.js` e `world-clock.js`
+- [ ] **Integração do `alarm_fired`** — conectar evento Rust com `alarm.js` via `onAlarmeFired()` do `tauri-bridge.js`
+
+### Média prioridade
 - [ ] Som diferente por alarme (campo `sound` já salvo no estado)
 - [ ] Soneca funcional (campo `snooze` já salvo no estado)
 - [ ] Busca com autocomplete no modal de adicionar cidade
-- [ ] Sessões de concentração (Focus Sessions) — fora do escopo v1.0
-
-### Melhorias técnicas
 - [ ] Substituir `localStorage` por `tauri-plugin-store` no `settings.js`
-- [ ] Build de produção e geração do instalador `.exe`
-- [ ] Ícone personalizado do app (substituir o padrão do Tauri)
 - [ ] Suporte a tema claro completo (revisar contrastes)
-- [ ] Aumentar cobertura de testes com casos de erro e edge cases
 
-### Qualidade
+### Baixa prioridade
+- [ ] Sessões de concentração (Focus Sessions) — fora do escopo v1.0
+- [ ] Aumentar cobertura de testes com casos de erro e edge cases
 - [ ] Remover `#[allow(dead_code)]` conforme campos forem usados
-- [ ] Adicionar `aria-live` nas regiões que atualizam dinamicamente (cronômetro, countdown)
+- [ ] Adicionar `aria-live` nas regiões que atualizam dinamicamente
 - [ ] Revisar acessibilidade dos modais (foco ao abrir, ESC fecha, trap de foco)
