@@ -98,20 +98,20 @@ async function dispararNotificacao(label) {
    LÓGICA DE CONTAGEM DE CADA TIMER
 ════════════════════════════════════════════════════════════ */
 function iniciarTimer(id) {
-  const st = timerStates[id];
+  const st    = timerStates[id];
   const timer = timers.find(t => t.id === id);
   if (!st || !timer || st.running) return;
 
   st.running   = true;
-  st.startedAt = performance.now();
+  // Recalcula startedAt baseado no remaining atual
+  st.startedAt = performance.now() - ((st.remainingOnPause - st.remainingOnPause) * 1000);
 
   function tick() {
     if (!st.running) return;
 
     const decorrido = (performance.now() - st.startedAt) / 1000;
-    st.remaining = Math.max(0, st.remainingOnPause - decorrido);
+    st.remaining    = Math.max(0, st.remainingOnPause - decorrido);
 
-    // Atualiza display
     const card = document.getElementById(`card-${id}`);
     if (card) {
       const display = card.querySelector('.timer-display');
@@ -141,7 +141,9 @@ function pausarTimer(id) {
 
   cancelAnimationFrame(st.rafId);
   st.running          = false;
+  // Salva o tempo restante no momento da pausa
   st.remainingOnPause = st.remaining;
+  st.startedAt        = 0; // reseta para forçar recálculo no próximo início
 
   atualizarBotoesCard(id);
 }
