@@ -242,17 +242,110 @@ function atualizarBotoesCard(id) {
 /* ═══════════════════════════════════════════════════════════
    ALWAYS-ON-TOP de um card específico
 ════════════════════════════════════════════════════════════ */
-async function alternarPin(btnPinEl) {
+async function alternarPin(btnPinEl, timerId) {
   try {
     isOnTop = !isOnTop;
-    await getCurrentWindow().setAlwaysOnTop(isOnTop);
+    const win = getCurrentWindow();
+
+    if (isOnTop) {
+      await win.setAlwaysOnTop(true);
+      await win.setSize({ type: 'Logical', width: 400, height: 480 });
+
+      // Esconde sidebar e action bar
+      document.getElementById('sidebar')?.style.setProperty('width', '0');
+      document.getElementById('sidebar')?.style.setProperty('min-width', '0');
+      document.getElementById('sidebar')?.style.setProperty('border', 'none');
+      document.getElementById('sidebar')?.style.setProperty('overflow', 'hidden');
+      document.getElementById('timerActions')?.classList.add('hidden');
+      document.getElementById('timerGrid')?.style.setProperty('display', 'block');
+
+      // Esconde todos os outros cards
+      document.querySelectorAll('.timer-card').forEach(c => {
+        if (c.id !== `card-${timerId}`) c.style.setProperty('display', 'none');
+      });
+
+      // Esconde botão expandir do card ativo
+      document.getElementById(`card-${timerId}`)
+        ?.querySelector('.timer-btn-expand')
+        ?.style.setProperty('display', 'none');
+
+      // Adiciona header PiP ao card
+      const cardAtivo = document.getElementById(`card-${timerId}`);
+      cardAtivo?.classList.add('timer-pip');
+      const headerExistente = cardAtivo?.querySelector('.timer-pip-header');
+      if (!headerExistente && cardAtivo) {
+        const pipHeader = document.createElement('div');
+        pipHeader.className = 'timer-pip-header';
+        pipHeader.innerHTML = `
+          <button class="timer-pip-btn" id="btnTimerPipIcon" title="Sair do PiP">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+              <rect x="7" y="7" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.2" fill="var(--bg-surface)"/>
+            </svg>
+          </button>
+          <span class="timer-pip-title">${timers.find(t => t.id === timerId)?.label || ''}</span>
+          <button class="timer-pip-btn timer-pip-close" title="Fechar PiP">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <line x1="1" y1="1" x2="11" y2="11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <line x1="11" y1="1" x2="1" y2="11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </button>`;
+        cardAtivo.insertBefore(pipHeader, cardAtivo.firstChild);
+      
+        // Esconde o header original do card
+        cardAtivo.querySelector('.timer-card-header')?.style.setProperty('display', 'none');
+      
+        // Botão fechar PiP
+        pipHeader.querySelector('.timer-pip-close')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          alternarPin(btnPinEl, timerId);
+        });
+      
+        // Botão ícone PiP também sai
+        pipHeader.querySelector('#btnTimerPipIcon')?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          alternarPin(btnPinEl, timerId);
+        });
+      }
+
+    } else {
+      await win.setAlwaysOnTop(false);
+      await win.setSize({ type: 'Logical', width: 800, height: 600 });
+
+      // Restaura sidebar
+      const sidebar = document.getElementById('sidebar');
+      sidebar?.style.removeProperty('width');
+      sidebar?.style.removeProperty('min-width');
+      sidebar?.style.removeProperty('border');
+      sidebar?.style.removeProperty('overflow');
+      document.getElementById('timerActions')?.classList.remove('hidden');
+      document.getElementById('timerGrid')?.style.removeProperty('display');
+
+      // Restaura todos os cards
+      document.querySelectorAll('.timer-card').forEach(c => {
+        c.style.removeProperty('display');
+      });
+
+      // Restaura botão expandir
+      document.getElementById(`card-${timerId}`)
+        ?.querySelector('.timer-btn-expand')
+        ?.style.removeProperty('display');
+
+      // Remove header PiP e restaura header original
+      const cardAtivo = document.getElementById(`card-${timerId}`);
+      cardAtivo?.classList.remove('timer-pip');
+      cardAtivo?.querySelector('.timer-pip-header')?.remove();
+      cardAtivo?.querySelector('.timer-card-header')?.style.removeProperty('display');
+    }
+
     btnPinEl.classList.toggle('active', isOnTop);
     btnPinEl.setAttribute(
       'title',
       isOnTop ? 'Desafixar da parte superior' : 'Manter na parte superior'
     );
+
   } catch (err) {
-    console.warn('[timer] Não foi possível alterar always-on-top:', err);
+    console.warn('[timer] Não foi possível alterar PiP:', err);
   }
 }
 
@@ -285,10 +378,8 @@ function criarCardTimer(timer) {
         </button>
         <button class="icon-btn timer-btn-pin" title="Manter na parte superior" aria-label="Manter na parte superior">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <rect x="2" y="2" width="12" height="12" rx="2"
-              stroke="currentColor" stroke-width="1.4"/>
-            <rect x="4" y="4" width="8" height="8" rx="1"
-              stroke="currentColor" stroke-width="1.2"/>
+            <rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+            <rect x="7" y="7" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.2" fill="var(--bg-surface)"/>
           </svg>
         </button>
         <button class="icon-btn timer-btn-delete hidden" title="Excluir" aria-label="Excluir">
@@ -404,7 +495,7 @@ function criarCardTimer(timer) {
 
   btnPin.addEventListener('click', (e) => {
     e.stopPropagation();
-    alternarPin(btnPin);
+    alternarPin(btnPin, timer.id);
   });
 
   btnDelete.addEventListener('click', (e) => {
