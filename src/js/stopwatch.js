@@ -203,17 +203,62 @@ function renderizarVoltas() {
 /* ═══════════════════════════════════════════════════════════
    EXPANDIR (modo tela cheia)
 ════════════════════════════════════════════════════════════ */
+let modoExpandido = false;
+
 async function alternarExpandir() {
-  try {
-    const win = getCurrentWindow();
-    const maximizada = await win.isMaximized();
-    if (maximizada) {
-      await win.unmaximize();
-    } else {
-      await win.maximize();
-    }
-  } catch (err) {
-    console.warn('[stopwatch] Não foi possível alternar janela:', err);
+  modoExpandido = !modoExpandido;
+  const sidebar  = document.getElementById('sidebar');
+  const display  = document.querySelector('.stopwatch-display');
+  const controls = document.querySelector('.stopwatch-controls');
+  const labels   = document.querySelector('.stopwatch-labels');
+
+  if (modoExpandido) {
+    // Esconde sidebar
+    sidebar?.style.setProperty('width', '0');
+    sidebar?.style.setProperty('min-width', '0');
+    sidebar?.style.setProperty('border', 'none');
+    sidebar?.style.setProperty('overflow', 'hidden');
+
+    // Esconde tabela de voltas
+    lapTable?.classList.add('hidden');
+
+    // Aumenta o display
+    if (display) display.style.transform = 'scale(1.6)';
+    if (labels)  labels.style.fontSize   = 'var(--fs-lg)';
+
+    // Ícone de recolher — setas se encontrando
+    btnExpand.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M6 2l-4 4M2 2h4v4M10 14l4-4M14 14h-4v-4"
+          stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+    btnExpand.setAttribute('title', 'Recolher');
+    btnPin?.style.setProperty('display', 'none');
+
+  } else {
+    // Restaura sidebar
+    sidebar?.style.removeProperty('width');
+    sidebar?.style.removeProperty('min-width');
+    sidebar?.style.removeProperty('border');
+    sidebar?.style.removeProperty('overflow');
+
+    // Restaura tabela de voltas se houver voltas
+    if (state.laps.length > 0) lapTable?.classList.remove('hidden');
+
+    // Restaura display
+    if (display) display.style.transform = '';
+    if (labels)  labels.style.fontSize   = '';
+
+    // Ícone de expandir — setas se afastando
+    btnExpand.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M10 2h4v4M6 14H2v-4M14 2l-5 5M2 14l5-5"
+          stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+    btnExpand.setAttribute('title', 'Expandir');
+    btnPin?.style.removeProperty('display');
   }
 }
 
@@ -223,14 +268,40 @@ async function alternarExpandir() {
 async function alternarPin() {
   try {
     state.isOnTop = !state.isOnTop;
-    await getCurrentWindow().setAlwaysOnTop(state.isOnTop);
+    const win = getCurrentWindow();
 
-    // Feedback visual no botão
+    if (state.isOnTop) {
+      await win.setAlwaysOnTop(true);
+      await win.setSize({ type: 'Logical', width: 400, height: 480 });
+
+      // Esconde sidebar
+      document.getElementById('sidebar')?.style.setProperty('width', '0');
+      document.getElementById('sidebar')?.style.setProperty('min-width', '0');
+      document.getElementById('sidebar')?.style.setProperty('border', 'none');
+      document.getElementById('sidebar')?.style.setProperty('overflow', 'hidden');
+
+      // Esconde botão expandir e voltas
+      btnExpand?.style.setProperty('display', 'none');
+      lapTable?.classList.add('hidden');
+
+    } else {
+      await win.setAlwaysOnTop(false);
+      await win.setSize({ type: 'Logical', width: 800, height: 600 });
+
+      // Restaura sidebar
+      const sidebar = document.getElementById('sidebar');
+      sidebar?.style.removeProperty('width');
+      sidebar?.style.removeProperty('min-width');
+      sidebar?.style.removeProperty('border');
+      sidebar?.style.removeProperty('overflow');
+
+      // Restaura botão expandir e voltas
+      btnExpand?.style.removeProperty('display');
+      if (state.laps.length > 0) lapTable?.classList.remove('hidden');
+    }
+
     btnPin?.classList.toggle('active', state.isOnTop);
-    btnPin?.setAttribute(
-      'aria-label',
-      state.isOnTop ? 'Desafixar da parte superior' : 'Manter na parte superior'
-    );
+
   } catch (err) {
     console.warn('[stopwatch] Não foi possível alterar always-on-top:', err);
   }
